@@ -182,24 +182,29 @@ const num = (v: unknown, fallback = 0): number => (typeof v === "number" ? v : f
 function ValidatorOut({ o }: { o: Record<string, unknown> }) {
   const score = num(o.score ?? o.viability_score ?? o.overall_score, 0);
   const verdict = str(o.verdict ?? o.recommendation);
+  const summary = str(o.summary);
+  const strengths = arr(o.strengths);
+  const weaknesses = arr(o.weaknesses);
+  const risks = arr(o.risks);
+  const next = arr(o.next_steps ?? o.recommendations);
   return (
     <div className="space-y-3">
       {(score > 0 || verdict) && (
         <ScoreGauge value={score} label={verdict || "Viability score"} />
       )}
-      {o.summary && <Block title="Summary">{str(o.summary)}</Block>}
-      {arr(o.strengths).length > 0 && (
-        <Block title="Strengths" accent="success"><BulletList items={arr(o.strengths)} accent="success" /></Block>
+      {summary && <Block title="Summary">{summary}</Block>}
+      {strengths.length > 0 && (
+        <Block title="Strengths" accent="success"><BulletList items={strengths} accent="success" /></Block>
       )}
-      {arr(o.weaknesses).length > 0 && (
-        <Block title="Weaknesses" accent="warning"><BulletList items={arr(o.weaknesses)} accent="warning" /></Block>
+      {weaknesses.length > 0 && (
+        <Block title="Weaknesses" accent="warning"><BulletList items={weaknesses} accent="warning" /></Block>
       )}
-      {arr(o.risks).length > 0 && (
-        <Block title="Key risks" accent="destructive"><BulletList items={arr(o.risks)} accent="destructive" /></Block>
+      {risks.length > 0 && (
+        <Block title="Key risks" accent="destructive"><BulletList items={risks} accent="destructive" /></Block>
       )}
-      {arr(o.next_steps ?? o.recommendations).length > 0 && (
+      {next.length > 0 && (
         <Block title="Recommended next steps" accent="primary">
-          <BulletList items={arr(o.next_steps ?? o.recommendations)} accent="primary" />
+          <BulletList items={next} accent="primary" />
         </Block>
       )}
     </div>
@@ -207,21 +212,26 @@ function ValidatorOut({ o }: { o: Record<string, unknown> }) {
 }
 
 function PitchOut({ o }: { o: Record<string, unknown> }) {
+  const headline = str(o.headline);
+  const problem = str(o.problem);
+  const solution = str(o.offer ?? o.solution);
+  const outcome = str(o.outcome);
+  const cta = str(o.cta);
   return (
     <div className="space-y-3">
-      {o.headline && (
+      {headline && (
         <div className="rounded-md border border-primary/30 bg-primary/5 p-5">
           <div className="text-[10.5px] font-semibold uppercase tracking-wider text-primary">Headline</div>
-          <div className="mt-2 font-display text-[1.35rem] font-semibold leading-tight tracking-tight">{str(o.headline)}</div>
+          <div className="mt-2 font-display text-[1.35rem] font-semibold leading-tight tracking-tight">{headline}</div>
         </div>
       )}
-      {o.problem && <Block title="Problem">{str(o.problem)}</Block>}
-      {(o.offer || o.solution) && <Block title="Solution" accent="primary">{str(o.offer ?? o.solution)}</Block>}
-      {o.outcome && <Block title="Outcome" accent="success">{str(o.outcome)}</Block>}
-      {o.cta && (
+      {problem && <Block title="Problem">{problem}</Block>}
+      {solution && <Block title="Solution" accent="primary">{solution}</Block>}
+      {outcome && <Block title="Outcome" accent="success">{outcome}</Block>}
+      {cta && (
         <div className="rounded-md border border-accent/30 bg-accent/5 p-4">
           <div className="text-[10.5px] font-semibold uppercase tracking-wider text-accent">Call to action</div>
-          <div className="mt-1.5 text-[14px] font-medium">{str(o.cta)}</div>
+          <div className="mt-1.5 text-[14px] font-medium">{cta}</div>
         </div>
       )}
     </div>
@@ -229,25 +239,32 @@ function PitchOut({ o }: { o: Record<string, unknown> }) {
 }
 
 function GtmOut({ o }: { o: Record<string, unknown> }) {
+  const icp = str(o.icp);
+  const positioning = str(o.positioning);
+  const channels = arr(o.channels);
+  const phases = arr(o.phases ?? o.timeline);
+  const priorities = arr(o.priorities);
   return (
     <div className="space-y-3">
-      {o.icp && <Block title="Ideal customer profile" accent="primary">{str(o.icp)}</Block>}
-      {o.positioning && <Block title="Positioning">{str(o.positioning)}</Block>}
-      {arr(o.channels).length > 0 && (
-        <Block title="Channels"><BulletList items={arr(o.channels)} accent="primary" /></Block>
+      {icp && <Block title="Ideal customer profile" accent="primary">{icp}</Block>}
+      {positioning && <Block title="Positioning">{positioning}</Block>}
+      {channels.length > 0 && (
+        <Block title="Channels"><BulletList items={channels} accent="primary" /></Block>
       )}
-      {arr(o.phases ?? o.timeline).length > 0 && (
+      {phases.length > 0 && (
         <div className="rounded-md border border-border bg-surface-2/60 p-4">
           <div className="mb-3 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Launch phases</div>
           <ol className="space-y-3">
-            {arr(o.phases ?? o.timeline).map((p, i) => {
+            {phases.map((p, i) => {
               const item = (typeof p === "object" && p) ? p as Record<string, unknown> : { name: String(p) };
+              const name = str(item.name ?? item.title ?? `Phase ${i + 1}`);
+              const description = str(item.description);
               return (
                 <li key={i} className="flex gap-3">
                   <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-primary/40 bg-primary/10 text-[11px] font-semibold text-primary tabular-nums">{i + 1}</span>
                   <div className="min-w-0 flex-1 text-[13.5px]">
-                    <div className="font-semibold">{str(item.name ?? item.title ?? `Phase ${i + 1}`)}</div>
-                    {item.description && <div className="mt-0.5 text-muted-foreground">{str(item.description)}</div>}
+                    <div className="font-semibold">{name}</div>
+                    {description && <div className="mt-0.5 text-muted-foreground">{description}</div>}
                   </div>
                 </li>
               );
@@ -255,45 +272,53 @@ function GtmOut({ o }: { o: Record<string, unknown> }) {
           </ol>
         </div>
       )}
-      {arr(o.priorities).length > 0 && (
-        <Block title="Priorities" accent="warning"><BulletList items={arr(o.priorities)} accent="warning" /></Block>
+      {priorities.length > 0 && (
+        <Block title="Priorities" accent="warning"><BulletList items={priorities} accent="warning" /></Block>
       )}
     </div>
   );
 }
 
 function OfferOut({ o }: { o: Record<string, unknown> }) {
+  const name = str(o.name);
+  const promise = str(o.promise);
+  const deliverables = arr(o.deliverables);
+  const priceAnchor = str(o.price_anchor);
+  const guarantee = str(o.guarantee);
   return (
     <div className="space-y-3">
-      {o.name && (
+      {name && (
         <div className="rounded-md border border-primary/30 bg-primary/5 p-5">
           <div className="text-[10.5px] font-semibold uppercase tracking-wider text-primary">Offer</div>
-          <div className="mt-2 font-display text-[1.35rem] font-semibold tracking-tight">{str(o.name)}</div>
-          {o.promise && <div className="mt-1.5 text-[13.5px] text-muted-foreground">{str(o.promise)}</div>}
+          <div className="mt-2 font-display text-[1.35rem] font-semibold tracking-tight">{name}</div>
+          {promise && <div className="mt-1.5 text-[13.5px] text-muted-foreground">{promise}</div>}
         </div>
       )}
-      {arr(o.deliverables).length > 0 && (
-        <Block title="Deliverables" accent="primary"><BulletList items={arr(o.deliverables)} accent="primary" /></Block>
+      {deliverables.length > 0 && (
+        <Block title="Deliverables" accent="primary"><BulletList items={deliverables} accent="primary" /></Block>
       )}
       <div className="grid gap-3 md:grid-cols-2">
-        {o.price_anchor && <Block title="Price anchor">{str(o.price_anchor)}</Block>}
-        {o.guarantee && <Block title="Guarantee" accent="success">{str(o.guarantee)}</Block>}
+        {priceAnchor && <Block title="Price anchor">{priceAnchor}</Block>}
+        {guarantee && <Block title="Guarantee" accent="success">{guarantee}</Block>}
       </div>
     </div>
   );
 }
 
 function OpsOut({ o }: { o: Record<string, unknown> }) {
+  const workflows = arr(o.workflows);
+  const automations = arr(o.automations);
+  const kpis = arr(o.kpis);
   return (
     <div className="space-y-3">
-      {arr(o.workflows).length > 0 && (
-        <Block title="Workflows"><BulletList items={arr(o.workflows)} accent="primary" /></Block>
+      {workflows.length > 0 && (
+        <Block title="Workflows"><BulletList items={workflows} accent="primary" /></Block>
       )}
-      {arr(o.automations).length > 0 && (
-        <Block title="Automations" accent="accent"><BulletList items={arr(o.automations)} accent="primary" /></Block>
+      {automations.length > 0 && (
+        <Block title="Automations" accent="accent"><BulletList items={automations} accent="primary" /></Block>
       )}
-      {arr(o.kpis).length > 0 && (
-        <Block title="Key metrics" accent="success"><BulletList items={arr(o.kpis)} accent="success" /></Block>
+      {kpis.length > 0 && (
+        <Block title="Key metrics" accent="success"><BulletList items={kpis} accent="success" /></Block>
       )}
     </div>
   );
@@ -306,19 +331,24 @@ function FollowupOut({ o }: { o: Record<string, unknown> }) {
     <div className="space-y-3">
       {seq.map((s, i) => {
         const item = typeof s === "object" && s ? s as Record<string, unknown> : { body: String(s) };
+        const day = str(item.day);
+        const delay = str(item.delay);
+        const channel = str(item.channel);
+        const subject = str(item.subject);
+        const body = str(item.body ?? item.message ?? item.content);
         return (
           <div key={i} className="rounded-md border border-border bg-surface-2/60 p-4">
             <div className="flex items-center justify-between gap-2">
               <div className="text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Step {i + 1}{item.day ? ` · Day ${str(item.day)}` : item.delay ? ` · ${str(item.delay)}` : ""}
+                Step {i + 1}{day ? ` · Day ${day}` : delay ? ` · ${delay}` : ""}
               </div>
-              {item.channel && (
-                <span className="rounded-full border border-border bg-surface px-2 py-0.5 text-[10px] text-muted-foreground">{str(item.channel)}</span>
+              {channel && (
+                <span className="rounded-full border border-border bg-surface px-2 py-0.5 text-[10px] text-muted-foreground">{channel}</span>
               )}
             </div>
-            {item.subject && <div className="mt-2 text-[13.5px] font-semibold">{str(item.subject)}</div>}
+            {subject && <div className="mt-2 text-[13.5px] font-semibold">{subject}</div>}
             <div className="mt-1.5 whitespace-pre-wrap text-[13px] leading-relaxed text-foreground/90">
-              {str(item.body ?? item.message ?? item.content)}
+              {body}
             </div>
           </div>
         );
@@ -328,19 +358,24 @@ function FollowupOut({ o }: { o: Record<string, unknown> }) {
 }
 
 function WebsiteOut({ o }: { o: Record<string, unknown> }) {
+  const issues = arr(o.issues);
+  const opportunities = arr(o.opportunities);
+  const suggested = arr(o.suggested_changes);
+  const seo = str(o.seo_notes);
+  const ux = str(o.ux_notes);
   return (
     <div className="space-y-3">
-      {arr(o.issues).length > 0 && (
-        <Block title="Issues" accent="destructive"><BulletList items={arr(o.issues)} accent="destructive" /></Block>
+      {issues.length > 0 && (
+        <Block title="Issues" accent="destructive"><BulletList items={issues} accent="destructive" /></Block>
       )}
-      {arr(o.opportunities).length > 0 && (
-        <Block title="Opportunities" accent="primary"><BulletList items={arr(o.opportunities)} accent="primary" /></Block>
+      {opportunities.length > 0 && (
+        <Block title="Opportunities" accent="primary"><BulletList items={opportunities} accent="primary" /></Block>
       )}
-      {arr(o.suggested_changes).length > 0 && (
-        <Block title="Suggested changes" accent="success"><BulletList items={arr(o.suggested_changes)} accent="success" /></Block>
+      {suggested.length > 0 && (
+        <Block title="Suggested changes" accent="success"><BulletList items={suggested} accent="success" /></Block>
       )}
-      {o.seo_notes && <Block title="SEO notes">{str(o.seo_notes)}</Block>}
-      {o.ux_notes && <Block title="UX notes">{str(o.ux_notes)}</Block>}
+      {seo && <Block title="SEO notes">{seo}</Block>}
+      {ux && <Block title="UX notes">{ux}</Block>}
     </div>
   );
 }
