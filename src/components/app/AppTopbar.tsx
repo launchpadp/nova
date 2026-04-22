@@ -1,6 +1,6 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useState, useEffect, useRef } from "react";
-import { LogOut, Sun, Moon, ChevronDown, Sparkles, User as UserIcon, Settings as SettingsIcon } from "lucide-react";
+import { LogOut, Sun, Moon, Monitor, ChevronDown, Sparkles, User as UserIcon, Settings as SettingsIcon, Check } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useTheme } from "@/lib/theme";
 import { useGuest } from "@/lib/guest";
@@ -36,11 +36,13 @@ function titleFor(path: string): string {
 export function AppTopbar() {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const { user, profile, currentOrgId, signOut } = useAuth();
-  const { theme, toggle } = useTheme();
+  const { theme, resolvedTheme, setTheme } = useTheme();
   const { isGuest, disable } = useGuest();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [themeOpen, setThemeOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const themeRef = useRef<HTMLDivElement | null>(null);
 
   const subQ = useQuery({ ...subscriptionQuery(currentOrgId ?? ""), enabled: !!currentOrgId });
   const plan = subQ.data?.plan ?? "starter";
@@ -61,10 +63,11 @@ export function AppTopbar() {
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
       if (!menuRef.current?.contains(e.target as Node)) setMenuOpen(false);
+      if (!themeRef.current?.contains(e.target as Node)) setThemeOpen(false);
     };
-    if (menuOpen) document.addEventListener("mousedown", onClick);
+    if (menuOpen || themeOpen) document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
-  }, [menuOpen]);
+  }, [menuOpen, themeOpen]);
 
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-background/85 px-4 backdrop-blur-xl md:px-6">
@@ -95,15 +98,39 @@ export function AppTopbar() {
           <span className="capitalize">{plan} plan</span>
         </span>
 
-        {/* Theme toggle */}
-        <button
-          onClick={toggle}
-          className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition hover:bg-accent hover:text-foreground"
-          aria-label="Toggle theme"
-          title={theme === "dark" ? "Switch to light" : "Switch to dark"}
-        >
-          {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-        </button>
+        {/* Theme picker */}
+        <div className="relative" ref={themeRef}>
+          <button
+            onClick={() => setThemeOpen((o) => !o)}
+            className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition hover:bg-accent hover:text-foreground"
+            aria-label="Choose theme"
+            title="Choose theme"
+          >
+            {theme === "system" ? <Monitor className="h-4 w-4" /> : resolvedTheme === "dark" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+          </button>
+          {themeOpen && (
+            <div className="absolute right-0 mt-2 w-40 origin-top-right overflow-hidden rounded-lg border border-border bg-popover p-1 shadow-elevated animate-scale-in">
+              {([
+                { id: "light", label: "Light", Icon: Sun },
+                { id: "dark", label: "Dark", Icon: Moon },
+                { id: "system", label: "System", Icon: Monitor },
+              ] as const).map(({ id, label, Icon }) => (
+                <button
+                  key={id}
+                  onClick={() => { setTheme(id); setThemeOpen(false); }}
+                  className={cn(
+                    "flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-sm transition hover:bg-accent",
+                    theme === id && "text-foreground",
+                  )}
+                >
+                  <Icon className="h-4 w-4" />
+                  <span className="flex-1 text-left">{label}</span>
+                  {theme === id && <Check className="h-3.5 w-3.5 text-primary" />}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
         {/* Avatar menu */}
         <div className="relative" ref={menuRef}>
