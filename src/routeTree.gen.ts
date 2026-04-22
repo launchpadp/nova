@@ -17,6 +17,10 @@ import { Route as AuthSignUpRouteImport } from './routes/auth.sign-up'
 import { Route as AuthSignInRouteImport } from './routes/auth.sign-in'
 import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth.forgot-password'
+import { Route as AppDashboardRouteImport } from './routes/app.dashboard'
+import { Route as AppLaunchpadIndexRouteImport } from './routes/app.launchpad.index'
+import { Route as AppLaunchpadHistoryRouteImport } from './routes/app.launchpad.history'
+import { Route as AppLaunchpadToolRouteImport } from './routes/app.launchpad.$tool'
 
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
@@ -58,36 +62,68 @@ const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
   path: '/auth/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLaunchpadIndexRoute = AppLaunchpadIndexRouteImport.update({
+  id: '/launchpad/',
+  path: '/launchpad/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLaunchpadHistoryRoute = AppLaunchpadHistoryRouteImport.update({
+  id: '/launchpad/history',
+  path: '/launchpad/history',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLaunchpadToolRoute = AppLaunchpadToolRouteImport.update({
+  id: '/launchpad/$tool',
+  path: '/launchpad/$tool',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/onboarding': typeof OnboardingRoute
+  '/app/dashboard': typeof AppDashboardRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
   '/app/': typeof AppIndexRoute
+  '/app/launchpad/$tool': typeof AppLaunchpadToolRoute
+  '/app/launchpad/history': typeof AppLaunchpadHistoryRoute
+  '/app/launchpad/': typeof AppLaunchpadIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/onboarding': typeof OnboardingRoute
+  '/app/dashboard': typeof AppDashboardRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
   '/app': typeof AppIndexRoute
+  '/app/launchpad/$tool': typeof AppLaunchpadToolRoute
+  '/app/launchpad/history': typeof AppLaunchpadHistoryRoute
+  '/app/launchpad': typeof AppLaunchpadIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/onboarding': typeof OnboardingRoute
+  '/app/dashboard': typeof AppDashboardRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/reset-password': typeof AuthResetPasswordRoute
   '/auth/sign-in': typeof AuthSignInRoute
   '/auth/sign-up': typeof AuthSignUpRoute
   '/app/': typeof AppIndexRoute
+  '/app/launchpad/$tool': typeof AppLaunchpadToolRoute
+  '/app/launchpad/history': typeof AppLaunchpadHistoryRoute
+  '/app/launchpad/': typeof AppLaunchpadIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -95,30 +131,42 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/onboarding'
+    | '/app/dashboard'
     | '/auth/forgot-password'
     | '/auth/reset-password'
     | '/auth/sign-in'
     | '/auth/sign-up'
     | '/app/'
+    | '/app/launchpad/$tool'
+    | '/app/launchpad/history'
+    | '/app/launchpad/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/onboarding'
+    | '/app/dashboard'
     | '/auth/forgot-password'
     | '/auth/reset-password'
     | '/auth/sign-in'
     | '/auth/sign-up'
     | '/app'
+    | '/app/launchpad/$tool'
+    | '/app/launchpad/history'
+    | '/app/launchpad'
   id:
     | '__root__'
     | '/'
     | '/app'
     | '/onboarding'
+    | '/app/dashboard'
     | '/auth/forgot-password'
     | '/auth/reset-password'
     | '/auth/sign-in'
     | '/auth/sign-up'
     | '/app/'
+    | '/app/launchpad/$tool'
+    | '/app/launchpad/history'
+    | '/app/launchpad/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -189,15 +237,51 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/dashboard': {
+      id: '/app/dashboard'
+      path: '/dashboard'
+      fullPath: '/app/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/launchpad/': {
+      id: '/app/launchpad/'
+      path: '/launchpad'
+      fullPath: '/app/launchpad/'
+      preLoaderRoute: typeof AppLaunchpadIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/launchpad/history': {
+      id: '/app/launchpad/history'
+      path: '/launchpad/history'
+      fullPath: '/app/launchpad/history'
+      preLoaderRoute: typeof AppLaunchpadHistoryRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/launchpad/$tool': {
+      id: '/app/launchpad/$tool'
+      path: '/launchpad/$tool'
+      fullPath: '/app/launchpad/$tool'
+      preLoaderRoute: typeof AppLaunchpadToolRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
+  AppDashboardRoute: typeof AppDashboardRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppLaunchpadToolRoute: typeof AppLaunchpadToolRoute
+  AppLaunchpadHistoryRoute: typeof AppLaunchpadHistoryRoute
+  AppLaunchpadIndexRoute: typeof AppLaunchpadIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppDashboardRoute: AppDashboardRoute,
   AppIndexRoute: AppIndexRoute,
+  AppLaunchpadToolRoute: AppLaunchpadToolRoute,
+  AppLaunchpadHistoryRoute: AppLaunchpadHistoryRoute,
+  AppLaunchpadIndexRoute: AppLaunchpadIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
