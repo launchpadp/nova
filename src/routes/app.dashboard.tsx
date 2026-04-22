@@ -70,40 +70,38 @@ function Dashboard() {
   return (
     <div className="space-y-8">
       {/* ── Welcome banner ── */}
-      <section className="relative overflow-hidden rounded-2xl border border-border bg-card p-6 md:p-8">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-launchpad/10" aria-hidden />
-        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/20 blur-3xl" aria-hidden />
-        <div className="relative flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div>
+      <section className="rounded-xl border border-border bg-card p-6 shadow-soft md:p-7">
+        <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+          <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-[11px] font-medium uppercase tracking-wider text-primary">
-                <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                {planLabel} plan
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-2.5 py-1 text-[11px] font-medium text-foreground/80">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                <span className="capitalize">{planLabel} plan</span>
               </span>
               {org?.stage && (
-                <span className="rounded-full border border-border bg-background/60 px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
+                <span className="rounded-full border border-border bg-background px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
                   Stage · {org.stage}
                 </span>
               )}
             </div>
-            <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight md:text-4xl">
-              {greetingFor()}, <span className="text-gradient">{firstName}</span>
+            <h2 className="mt-4 font-display text-[1.7rem] font-semibold tracking-tight md:text-[2rem]">
+              {greetingFor()}, {firstName}
             </h2>
-            <p className="mt-1.5 text-sm text-muted-foreground">
-              {org?.name ? `${org.name} · ` : ""}Your AI operating system at a glance.
+            <p className="mt-1 text-[14px] text-muted-foreground">
+              {org?.name ? `${org.name} · ` : ""}Here's what's happening across your business today.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Link to="/app/launchpad">
-              <Button className="gap-2 bg-gradient-primary text-primary-foreground hover:opacity-90">
-                <Sparkles className="h-4 w-4" /> Run a Tool
+              <Button className="gap-2">
+                <Sparkles className="h-4 w-4" /> Run a tool
               </Button>
             </Link>
             <Link to="/app/leads">
-              <Button variant="outline" className="gap-2"><Plus className="h-4 w-4" /> Add Lead</Button>
+              <Button variant="outline" className="gap-2"><Plus className="h-4 w-4" /> Add lead</Button>
             </Link>
             <Link to="/app/assets">
-              <Button variant="ghost" className="gap-2"><FolderOpen className="h-4 w-4" /> View Assets</Button>
+              <Button variant="ghost" className="gap-2"><FolderOpen className="h-4 w-4" /> View assets</Button>
             </Link>
           </div>
         </div>
@@ -112,16 +110,18 @@ function Dashboard() {
       {/* ── KPI Row ── */}
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {kpis.map((k) => (
-          <div key={k.label} className="group relative overflow-hidden rounded-2xl border border-border bg-card p-5 transition hover:border-primary/40 hover:shadow-elevated">
-            <div className={cn("absolute -right-8 -top-8 h-24 w-24 rounded-full bg-gradient-to-br opacity-20 blur-2xl transition group-hover:opacity-40", k.accent)} aria-hidden />
-            <div className="relative flex items-start justify-between">
+          <div
+            key={k.label}
+            className="rounded-xl border border-border bg-card p-5 shadow-soft transition hover:border-foreground/15"
+          >
+            <div className="flex items-start justify-between">
               <div>
-                <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{k.label}</div>
-                <div className="mt-2 font-display text-3xl font-semibold tracking-tight">{k.value}</div>
-                <div className="mt-1 text-xs text-muted-foreground">{k.sub}</div>
+                <div className="text-[11.5px] font-medium text-muted-foreground">{k.label}</div>
+                <div className="mt-2 font-display text-[1.8rem] font-semibold tracking-tight leading-none">{k.value}</div>
+                <div className="mt-2 text-[11.5px] text-muted-foreground">{k.sub}</div>
               </div>
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <k.icon className="h-4.5 w-4.5" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <k.icon className="h-4 w-4" />
               </div>
             </div>
           </div>
@@ -131,22 +131,22 @@ function Dashboard() {
       {/* ── Usage + Activity ── */}
       <section className="grid gap-4 lg:grid-cols-3">
         {/* Usage */}
-        <div className="rounded-2xl border border-border bg-card p-5 lg:col-span-1">
+        <div className="rounded-xl border border-border bg-card p-5 shadow-soft lg:col-span-1">
           <div className="flex items-center justify-between">
-            <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Monthly Usage</div>
-            <Link to="/app/billing" className="text-[11px] text-muted-foreground hover:text-foreground">Manage →</Link>
+            <div className="text-[11.5px] font-medium text-muted-foreground">Monthly usage</div>
+            <Link to="/app/billing" className="text-[11.5px] text-muted-foreground hover:text-foreground">Manage</Link>
           </div>
           <div className="mt-4 flex items-end gap-2">
-            <span className="font-display text-3xl font-semibold">{totalUsed}</span>
+            <span className="font-display text-[1.8rem] font-semibold leading-none">{totalUsed}</span>
             <span className="pb-1 text-sm text-muted-foreground">/ {limit ?? "∞"}</span>
           </div>
-          <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-muted">
+          <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-muted">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-primary to-primary-glow transition-all"
+              className="h-full rounded-full bg-primary transition-all"
               style={{ width: `${limit ? usagePct : 8}%` }}
             />
           </div>
-          <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
+          <div className="mt-2 flex items-center justify-between text-[11.5px] text-muted-foreground">
             <span>{limit ? `${usagePct}% of plan` : "Unlimited"}</span>
             <span className="capitalize">{planLabel}</span>
           </div>
@@ -158,18 +158,18 @@ function Dashboard() {
         </div>
 
         {/* Recent activity */}
-        <div className="rounded-2xl border border-border bg-card p-5 lg:col-span-2">
+        <div className="rounded-xl border border-border bg-card p-5 shadow-soft lg:col-span-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Activity className="h-4 w-4 text-muted-foreground" />
-              <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Recent activity</div>
+              <div className="text-[11.5px] font-medium text-muted-foreground">Recent activity</div>
             </div>
-            <Link to="/app/launchpad/history" className="text-[11px] text-muted-foreground hover:text-foreground">View all →</Link>
+            <Link to="/app/launchpad/history" className="text-[11.5px] text-muted-foreground hover:text-foreground">View all</Link>
           </div>
 
           {recentRuns.length === 0 ? (
-            <div className="mt-6 rounded-xl border border-dashed border-border bg-background/50 p-8 text-center">
-              <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <div className="mt-6 rounded-lg border border-dashed border-border p-8 text-center">
+              <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <Sparkles className="h-5 w-5" />
               </div>
               <div className="mt-3 text-sm font-medium">No activity yet</div>

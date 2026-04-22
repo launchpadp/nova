@@ -44,12 +44,12 @@ function NovaOverview() {
   return (
     <div className="space-y-7">
       <MissionHeader
-        label="NOVA OS — AUTOMATION COMMAND"
-        title="Deployable Modules"
-        description="Toggle systems online to put your operation on autopilot. Each module is a force multiplier."
+        label="Nova OS"
+        title="Automation modules"
+        description="Toggle modules on to put repetitive work on autopilot. Each one connects to your existing tools."
         actions={
-          <span className="font-display text-[10px] tracking-[0.18em] text-muted-foreground">
-            PLAN: <span className="text-primary-glow">{plan.toUpperCase()}</span>
+          <span className="text-[11.5px] text-muted-foreground">
+            Plan: <span className="font-medium capitalize text-foreground">{plan}</span>
           </span>
         }
       />
@@ -64,23 +64,23 @@ function NovaOverview() {
             <div key={mod.key} className="relative">
               <div
                 className={cn(
-                  "tactical-card scanlines relative h-full overflow-hidden rounded-xl border border-border bg-card p-5",
-                  !unlocked && "opacity-90"
+                  "tactical-card relative h-full overflow-hidden rounded-xl border border-border bg-card p-5 shadow-soft",
+                  !unlocked && "opacity-95",
                 )}
               >
-                <div className="relative z-[2] flex items-start justify-between gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-lg border border-primary/30 bg-primary/10 text-primary">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
                     <Icon className="h-5 w-5" />
                   </div>
                   <StatusBadge variant={online ? "online" : "standby"} live={online} />
                 </div>
 
-                <div className="relative z-[2] mt-4">
-                  <div className="font-display text-base font-semibold tracking-tight">{mod.name}</div>
-                  <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{mod.desc}</p>
+                <div className="mt-4">
+                  <div className="font-display text-[15px] font-semibold tracking-tight">{mod.name}</div>
+                  <p className="mt-1 line-clamp-2 text-[13px] text-muted-foreground">{mod.desc}</p>
                 </div>
 
-                <div className="relative z-[2] mt-5 flex items-center justify-between">
+                <div className="mt-5 flex items-center justify-between">
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <Switch
                       checked={online}
@@ -94,14 +94,14 @@ function NovaOverview() {
                             value: status?.value ?? "",
                             status: v ? "connected" : "disabled",
                           },
-                          { onConflict: "user_id,integration_key" }
+                          { onConflict: "user_id,integration_key" },
                         );
                         if (error) toast.error(error.message);
                         else qc.invalidateQueries({ queryKey: ["user_integrations", user.id] });
                       }}
                       disabled={!unlocked}
                     />
-                    <span>{online ? "ONLINE" : "STANDBY"}</span>
+                    <span>{online ? "Online" : "Standby"}</span>
                   </div>
                   <Button
                     size="sm"
@@ -128,14 +128,15 @@ function NovaOverview() {
 
 function LockedModule() {
   return (
-    <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-background/70 backdrop-blur-[3px]">
-      <div className="rounded-lg border border-primary/30 bg-card/90 p-4 text-center shadow-elevated">
-        <div className="mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary">
+    <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-background/85 backdrop-blur-[2px]">
+      <div className="rounded-lg border border-border bg-card p-4 text-center shadow-elevated">
+        <div className="mx-auto mb-2 flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
           <Lock className="h-4 w-4" />
         </div>
-        <div className="font-display text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">SECURITY CLEARANCE REQUIRED</div>
+        <div className="text-[12.5px] font-medium text-foreground">Available on Operate</div>
+        <div className="mt-0.5 text-[11.5px] text-muted-foreground">Upgrade to deploy this module.</div>
         <Link to="/app/billing">
-          <Button size="sm" className="btn-execute mt-3">UPGRADE TO OPERATE</Button>
+          <Button size="sm" className="mt-3">Upgrade plan</Button>
         </Link>
       </div>
     </div>
@@ -168,11 +169,11 @@ function ConfigureSheet({
         value: url,
         status: url ? "connected" : "disabled",
       },
-      { onConflict: "user_id,integration_key" }
+      { onConflict: "user_id,integration_key" },
     );
     if (error) toast.error(error.message);
     else {
-      toast.success("Module configured");
+      toast.success("Module saved");
       qc.invalidateQueries({ queryKey: ["user_integrations", user.id] });
       onOpenChange(false);
     }
@@ -182,17 +183,18 @@ function ConfigureSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="sm:max-w-md">
         <SheetHeader>
-          <div className="mission-title text-[10px]">MODULE CONFIG</div>
-          <SheetTitle className="font-display text-xl">{mod?.name}</SheetTitle>
-          <SheetDescription>Wire this module to a webhook endpoint to trigger real-world actions.</SheetDescription>
+          <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+            Module configuration
+          </div>
+          <SheetTitle className="font-display text-[18px]">{mod?.name}</SheetTitle>
+          <SheetDescription>
+            Wire this module to a webhook endpoint to trigger real-world actions.
+          </SheetDescription>
         </SheetHeader>
-        <div className="mt-6 space-y-3 px-4">
+        <div className="mt-6 space-y-4 px-4">
           <div>
-            <div className="mb-1.5 font-display text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-              Webhook URL
-            </div>
+            <div className="mb-1.5 text-[12.5px] font-medium text-foreground">Webhook URL</div>
             <Input
-              className="terminal-input"
               placeholder="https://hooks.example.com/..."
               value={url}
               onChange={(e) => setUrl(e.target.value)}
@@ -202,7 +204,7 @@ function ConfigureSheet({
               We'll POST events to this URL when the module fires.
             </p>
           </div>
-          <Button onClick={save} className="btn-execute w-full">SAVE MODULE</Button>
+          <Button onClick={save} className="w-full">Save module</Button>
         </div>
       </SheetContent>
     </Sheet>

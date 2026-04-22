@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, redirect } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { Sparkles, ArrowRight, ArrowLeft, Check, Zap } from "lucide-react";
+import { Sparkles, ArrowRight, ArrowLeft, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -35,61 +35,23 @@ const STEPS: Step[] = [
   { key: "blocker",        label: "What's your biggest blocker right now?",  placeholder: "e.g. No leads, no offer, no time" },
 ];
 
-function Confetti() {
-  // Lightweight confetti using random divs
-  const pieces = Array.from({ length: 80 });
-  return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden">
-      {pieces.map((_, i) => {
-        const left = Math.random() * 100;
-        const delay = Math.random() * 0.6;
-        const duration = 2 + Math.random() * 1.5;
-        const colors = ["var(--primary)", "var(--primary-glow)", "var(--launchpad)", "var(--success)", "var(--warning)"];
-        const color = colors[i % colors.length];
-        return (
-          <span
-            key={i}
-            className="absolute top-0 h-2 w-1.5 rounded-sm"
-            style={{
-              left: `${left}%`,
-              backgroundColor: color,
-              animation: `fall ${duration}s ease-in ${delay}s forwards`,
-              transform: `rotate(${Math.random() * 360}deg)`,
-            }}
-          />
-        );
-      })}
-      <style>{`@keyframes fall { to { transform: translateY(110vh) rotate(720deg); opacity: 0.4; } }`}</style>
-    </div>
-  );
-}
-
 function Onboarding() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [data, setData] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [completed, setCompleted] = useState(false);
-  const [pulse, setPulse] = useState(false);
-  const isFinalScreen = completed;
 
   const current = STEPS[step];
   const progress = ((step + 1) / STEPS.length) * 100;
   const value = data[current.key] || "";
-
-  useEffect(() => {
-    if (pulse) {
-      const t = setTimeout(() => setPulse(false), 350);
-      return () => clearTimeout(t);
-    }
-  }, [pulse]);
 
   const saveStep = async (key: string, val: string) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
     await supabase.from("onboarding_responses").upsert(
       { user_id: user.id, question_key: key, answer: val },
-      { onConflict: "user_id,question_key" }
+      { onConflict: "user_id,question_key" },
     );
   };
 
@@ -129,28 +91,29 @@ function Onboarding() {
   const next = async () => {
     if (!value.trim()) return;
     await saveStep(current.key, value);
-    setPulse(true);
-    if (step < STEPS.length - 1) setTimeout(() => setStep(step + 1), 150);
+    if (step < STEPS.length - 1) setStep(step + 1);
     else void finish();
   };
 
-  if (isFinalScreen) {
+  // Final screen
+  if (completed) {
     return (
       <div className="boot-grid relative flex min-h-screen flex-col items-center justify-center overflow-hidden p-6">
-        <Confetti />
-        <div className="relative z-10 text-center">
-          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-primary glow-primary">
-            <Check className="h-10 w-10 text-primary-foreground" />
+        <div className="text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-elevated">
+            <Check className="h-8 w-8" />
           </div>
-          <div className="mission-title mt-6">SYSTEM ONLINE</div>
-          <h1 className="mt-3 font-display text-4xl font-bold tracking-tight md:text-5xl">
-            <span className="text-gradient">Welcome to Nova OPS</span>
+          <div className="mt-6 text-[12px] font-medium uppercase tracking-wider text-muted-foreground">
+            All set
+          </div>
+          <h1 className="mt-3 font-display text-[2.25rem] font-semibold tracking-tight md:text-[2.75rem]">
+            Welcome to <span className="text-gradient">Nova OPS</span>
           </h1>
-          <p className="mt-3 max-w-md text-sm text-muted-foreground">
-            Your operating system is calibrated. All systems are ready for deployment.
+          <p className="mt-3 max-w-md text-[14px] text-muted-foreground">
+            Your workspace is ready. Jump in and run your first AI tool.
           </p>
-          <Button onClick={() => navigate({ to: "/app/dashboard" })} className="btn-execute mt-8 gap-2">
-            <Zap className="h-4 w-4" /> ENTER NOVA OPS
+          <Button onClick={() => navigate({ to: "/app/dashboard" })} className="mt-8 gap-2">
+            Open Nova OPS <ArrowRight className="h-4 w-4" />
           </Button>
         </div>
       </div>
@@ -160,33 +123,41 @@ function Onboarding() {
   return (
     <div className="boot-grid relative flex min-h-screen flex-col">
       {/* Header */}
-      <header className="relative z-10 flex h-14 items-center gap-2 border-b border-border/40 px-6 backdrop-blur-sm">
-        <div className="flex h-7 w-7 items-center justify-center rounded-md bg-gradient-primary glow-primary">
-          <Sparkles className="h-4 w-4 text-primary-foreground" />
+      <header className="relative z-10 flex h-14 items-center gap-2 border-b border-border bg-background/85 px-6 backdrop-blur">
+        <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
+          <Sparkles className="h-3.5 w-3.5" />
         </div>
-        <span className="font-display text-sm font-semibold tracking-tight">Nova OPS</span>
-        <span className="ml-2 font-display text-[10px] tracking-[0.22em] text-muted-foreground">SYSTEM INITIALIZATION</span>
-        <div className="ml-auto font-mono text-xs text-muted-foreground">
-          [{String(step + 1).padStart(2, "0")} / {String(STEPS.length).padStart(2, "0")}]
+        <span className="font-display text-[14px] font-semibold tracking-tight">Nova OPS</span>
+        <span className="ml-2 text-[11.5px] text-muted-foreground">Welcome — let's set things up</span>
+        <div className="ml-auto text-xs text-muted-foreground">
+          Step {step + 1} of {STEPS.length}
         </div>
       </header>
 
-      {/* Boot bar */}
-      <div className="relative z-10 border-b border-border/40 bg-background/40 px-6 py-2 backdrop-blur-sm">
+      {/* Progress bar */}
+      <div className="relative z-10 border-b border-border bg-background/70 px-6 py-3 backdrop-blur">
         <div className="flex items-center gap-3">
-          <span className="font-mono text-[10px] tracking-[0.18em] text-primary-glow">BOOT</span>
-          <div className="xp-bar flex-1">
-            <div className="xp-fill" style={{ width: `${progress}%` }} />
+          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full rounded-full bg-primary transition-all duration-300"
+              style={{ width: `${progress}%` }}
+            />
           </div>
-          <span className="font-mono text-[10px] tracking-[0.18em] text-primary-glow">{Math.round(progress)}%</span>
+          <span className="text-[11.5px] font-medium tabular-nums text-muted-foreground">
+            {Math.round(progress)}%
+          </span>
         </div>
       </div>
 
       {/* Question */}
       <main className="relative z-10 flex flex-1 items-center justify-center p-6">
-        <div className={cn("w-full max-w-xl transition", pulse && "animate-pulse")}>
-          <div className="mission-title text-[10px]">QUERY {String(step + 1).padStart(2, "0")}</div>
-          <h1 className="mt-3 font-display text-2xl font-semibold tracking-tight md:text-3xl">{current.label}</h1>
+        <div className="w-full max-w-xl">
+          <div className="text-[11.5px] font-medium uppercase tracking-wider text-muted-foreground">
+            Question {step + 1}
+          </div>
+          <h1 className="mt-3 font-display text-[1.6rem] font-semibold tracking-tight md:text-[1.85rem]">
+            {current.label}
+          </h1>
 
           <div className="mt-6">
             {current.choices ? (
@@ -197,10 +168,10 @@ function Onboarding() {
                     type="button"
                     onClick={() => setData({ ...data, [current.key]: c })}
                     className={cn(
-                      "rounded-md border px-3 py-3 font-display text-sm font-semibold uppercase tracking-wider transition",
+                      "rounded-md border px-3 py-3 text-[13px] font-medium transition",
                       value === c
-                        ? "border-primary bg-primary/15 text-primary-glow shadow-[0_0_20px_-4px_var(--primary-glow)]"
-                        : "border-border bg-card text-foreground/80 hover:border-primary/50 hover:bg-primary/5"
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border bg-card text-foreground/80 hover:border-foreground/20 hover:bg-muted/40",
                     )}
                   >
                     {c}
@@ -210,7 +181,7 @@ function Onboarding() {
             ) : (
               <Input
                 autoFocus
-                className="terminal-input h-12 text-base"
+                className="h-11 text-base"
                 placeholder={current.placeholder}
                 value={value}
                 onChange={(e) => setData({ ...data, [current.key]: e.target.value })}
@@ -220,11 +191,19 @@ function Onboarding() {
           </div>
 
           <div className="mt-8 flex items-center justify-between">
-            <Button variant="ghost" disabled={step === 0 || submitting} onClick={() => setStep(step - 1)}>
+            <Button
+              variant="ghost"
+              disabled={step === 0 || submitting}
+              onClick={() => setStep(step - 1)}
+            >
               <ArrowLeft className="h-4 w-4" /> Back
             </Button>
-            <Button onClick={() => void next()} disabled={submitting || !value.trim()} className="btn-execute">
-              {step === STEPS.length - 1 ? <>FINISH <Check className="h-4 w-4" /></> : <>NEXT <ArrowRight className="h-4 w-4" /></>}
+            <Button onClick={() => void next()} disabled={submitting || !value.trim()}>
+              {step === STEPS.length - 1 ? (
+                <>Finish <Check className="h-4 w-4" /></>
+              ) : (
+                <>Continue <ArrowRight className="h-4 w-4" /></>
+              )}
             </Button>
           </div>
         </div>
