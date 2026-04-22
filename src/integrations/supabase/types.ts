@@ -109,6 +109,59 @@ export type Database = {
           },
         ]
       }
+      leads: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          organization_id: string
+          phone: string | null
+          source: string | null
+          stage: Database["public"]["Enums"]["lead_stage"]
+          updated_at: string
+          user_id: string
+          value: number | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          organization_id: string
+          phone?: string | null
+          source?: string | null
+          stage?: Database["public"]["Enums"]["lead_stage"]
+          updated_at?: string
+          user_id: string
+          value?: number | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          organization_id?: string
+          phone?: string | null
+          source?: string | null
+          stage?: Database["public"]["Enums"]["lead_stage"]
+          updated_at?: string
+          user_id?: string
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       onboarding_responses: {
         Row: {
           answer: string | null
@@ -399,6 +452,36 @@ export type Database = {
           },
         ]
       }
+      user_integrations: {
+        Row: {
+          created_at: string
+          id: string
+          integration_key: string
+          status: string
+          updated_at: string
+          user_id: string
+          value: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          integration_key: string
+          status?: string
+          updated_at?: string
+          user_id: string
+          value?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          integration_key?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+          value?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -494,6 +577,13 @@ export type Database = {
     Enums: {
       app_role: "user" | "admin"
       business_stage: "Idea" | "Validate" | "Launch" | "Operate" | "Scale"
+      lead_stage:
+        | "New"
+        | "Contacted"
+        | "Qualified"
+        | "Proposal"
+        | "Won"
+        | "Lost"
       org_role: "owner" | "admin" | "member"
       plan_tier: "starter" | "launch" | "operate" | "scale"
       tool_run_status: "running" | "succeeded" | "failed"
@@ -626,6 +716,7 @@ export const Constants = {
     Enums: {
       app_role: ["user", "admin"],
       business_stage: ["Idea", "Validate", "Launch", "Operate", "Scale"],
+      lead_stage: ["New", "Contacted", "Qualified", "Proposal", "Won", "Lost"],
       org_role: ["owner", "admin", "member"],
       plan_tier: ["starter", "launch", "operate", "scale"],
       tool_run_status: ["running", "succeeded", "failed"],
