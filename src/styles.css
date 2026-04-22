@@ -213,3 +213,180 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 .page-in { animation: pageIn 0.28s ease-out both; }
+
+/* ───────────────────────────── Tactical Game Interface ───────────────────────────── */
+@layer utilities {
+  /* Faint scanline texture overlay for cards */
+  .scanlines {
+    position: relative;
+  }
+  .scanlines::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 2px,
+      color-mix(in oklab, var(--foreground) 100%, transparent) 3px,
+      transparent 3px
+    );
+    opacity: 0.03;
+    border-radius: inherit;
+    z-index: 1;
+  }
+
+  /* Tactical card: hover lift + glow pulse */
+  .tactical-card {
+    position: relative;
+    transition:
+      transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1),
+      box-shadow 0.25s ease,
+      border-color 0.25s ease,
+      background-color 0.25s ease;
+  }
+  .tactical-card:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in oklab, var(--primary) 55%, transparent);
+    box-shadow:
+      0 0 0 1px color-mix(in oklab, var(--primary) 30%, transparent),
+      0 12px 36px -12px color-mix(in oklab, var(--primary) 45%, transparent),
+      inset 0 0 24px -12px color-mix(in oklab, var(--primary) 25%, transparent);
+  }
+
+  /* Mission section header */
+  .mission-title {
+    font-family: var(--font-display);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: color-mix(in oklab, var(--primary-glow) 90%, var(--foreground));
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .mission-title::before {
+    content: "";
+    display: inline-block;
+    width: 28px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary), transparent);
+    border-radius: 999px;
+  }
+
+  /* XP / progress bars */
+  .xp-bar {
+    position: relative;
+    height: 8px;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--foreground) 8%, transparent);
+    overflow: hidden;
+    border: 1px solid color-mix(in oklab, var(--primary) 18%, transparent);
+  }
+  .xp-bar > .xp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--primary-glow));
+    box-shadow: 0 0 14px color-mix(in oklab, var(--primary-glow) 60%, transparent);
+    border-radius: 999px;
+    transition: width 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  /* Status badge: ACTIVE / LOCKED / ONLINE / STANDBY / COMING SOON */
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 4px;
+    font-family: var(--font-display);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    border: 1px solid currentColor;
+    background: color-mix(in oklab, currentColor 12%, transparent);
+  }
+  .status-badge .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: currentColor;
+    box-shadow: 0 0 8px currentColor;
+  }
+  .status-active { color: var(--success); }
+  .status-online { color: var(--success); }
+  .status-standby { color: var(--warning); }
+  .status-locked { color: var(--muted-foreground); }
+  .status-soon { color: var(--launchpad); }
+
+  /* Glowing pulse for ONLINE indicator */
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 1; box-shadow: 0 0 8px currentColor; }
+    50% { opacity: 0.55; box-shadow: 0 0 14px currentColor; }
+  }
+  .status-badge .dot.live { animation: pulse-glow 2s ease-in-out infinite; }
+
+  /* Glow border (for active drawer / focused module) */
+  .glow-border {
+    box-shadow:
+      0 0 0 1px color-mix(in oklab, var(--primary) 50%, transparent),
+      0 0 24px -4px color-mix(in oklab, var(--primary-glow) 50%, transparent);
+  }
+
+  /* Terminal-style input */
+  .terminal-input {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    background: color-mix(in oklab, var(--background) 80%, var(--primary) 4%);
+    border: 1px solid color-mix(in oklab, var(--primary) 22%, transparent);
+    color: var(--foreground);
+  }
+  .terminal-input::placeholder {
+    color: color-mix(in oklab, var(--muted-foreground) 80%, transparent);
+  }
+  .terminal-input:focus-visible {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 25%, transparent);
+  }
+
+  /* Glowing EXECUTE button effect */
+  .btn-execute {
+    background: linear-gradient(135deg, var(--primary), var(--primary-glow));
+    color: var(--primary-foreground);
+    font-family: var(--font-display);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 700;
+    box-shadow: 0 0 22px -4px color-mix(in oklab, var(--primary-glow) 70%, transparent);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+  .btn-execute:hover {
+    box-shadow: 0 0 34px -2px color-mix(in oklab, var(--primary-glow) 90%, transparent);
+    transform: translateY(-1px);
+  }
+
+  /* Boot grid animated background for onboarding */
+  .boot-grid {
+    background-color: var(--background);
+    background-image:
+      linear-gradient(to right, color-mix(in oklab, var(--primary) 8%, transparent) 1px, transparent 1px),
+      linear-gradient(to bottom, color-mix(in oklab, var(--primary) 8%, transparent) 1px, transparent 1px),
+      radial-gradient(50rem 35rem at 50% 50%, color-mix(in oklab, var(--primary) 14%, transparent), transparent 70%);
+    background-size: 48px 48px, 48px 48px, auto;
+  }
+
+  /* Typewriter caret blink */
+  @keyframes caret-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+  .caret::after {
+    content: "▌";
+    margin-left: 2px;
+    color: var(--primary-glow);
+    animation: caret-blink 1s steps(2) infinite;
+  }
+
+  /* Lift hover for sticky lists */
+  .lift-on-hover { transition: transform 0.2s ease, background-color 0.2s ease; }
+  .lift-on-hover:hover { transform: translateY(-1px); }
+}
