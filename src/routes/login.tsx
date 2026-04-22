@@ -56,7 +56,7 @@ function LoginPage() {
 
           <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
             <Link to="/forgot-password" className="hover:text-foreground">Forgot password?</Link>
-            <Link to="/signup" className="hover:text-foreground">Create account →</Link>
+            <Link to="/signup" search={{ plan: undefined }} className="hover:text-foreground">Create account →</Link>
           </div>
         </div>
       </div>
