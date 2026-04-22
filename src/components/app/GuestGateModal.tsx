@@ -36,7 +36,7 @@ export function GuestGateModal() {
 
           <div className="mt-6 flex flex-col gap-2">
             <Button
-              onClick={() => { closeGate(); navigate({ to: "/signup" }); }}
+              onClick={() => { closeGate(); navigate({ to: "/signup", search: { plan: undefined } }); }}
               className="btn-execute w-full gap-2"
             >
               <Sparkles className="h-4 w-4" /> Sign Up Free
