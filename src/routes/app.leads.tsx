@@ -78,7 +78,7 @@ function LeadsPage() {
         title="Target Pipeline"
         description="Every lead is a target. Track, qualify, and close."
         actions={
-          <Button onClick={() => setOpenAdd(true)} className="btn-execute gap-2">
+          <Button onClick={() => { if (!blockIfGuest("Sign up to start tracking real leads.")) setOpenAdd(true); }} className="btn-execute gap-2">
             <Plus className="h-4 w-4" /> ADD TARGET
           </Button>
         }
@@ -128,7 +128,7 @@ function LeadsPage() {
             </div>
             <h2 className="mt-4 font-display text-lg font-semibold">No targets acquired yet</h2>
             <p className="mt-1 text-sm text-muted-foreground">Add your first target to start tracking the pipeline.</p>
-            <Button onClick={() => setOpenAdd(true)} className="btn-execute mt-4 gap-2">
+            <Button onClick={() => { if (!blockIfGuest("Sign up to start tracking real leads.")) setOpenAdd(true); }} className="btn-execute mt-4 gap-2">
               <Plus className="h-4 w-4" /> ADD TARGET
             </Button>
           </div>
