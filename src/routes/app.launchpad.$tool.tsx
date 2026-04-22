@@ -5,7 +5,7 @@ import { launchpadCatalog } from "@/lib/mock";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Loader2, Save, Terminal, Zap } from "lucide-react";
+import { Loader2, Save, FileText, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -20,7 +20,11 @@ export const Route = createFileRoute("/app/launchpad/$tool")({
   },
   component: ToolPage,
   notFoundComponent: () => (
-    <div className="p-6"><div className="text-sm">Unknown tool. <Link to="/app/launchpad" className="underline">Back to Launchpad</Link></div></div>
+    <div className="p-6">
+      <div className="text-sm">
+        Unknown tool. <Link to="/app/launchpad" className="underline">Back to Launchpad</Link>
+      </div>
+    </div>
   ),
 });
 
@@ -58,26 +62,29 @@ function ToolPage() {
     setGenerating(true);
     setOutput(null);
     try {
-      const payload: Record<string, unknown> = { idea: context, business: title || context, target: title, context, goal: context, offer: context, url: context };
+      const payload: Record<string, unknown> = {
+        idea: context, business: title || context, target: title,
+        context, goal: context, offer: context, url: context,
+      };
       const { data, error } = await supabase.functions.invoke(tool.toolKey, { body: payload });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       setOutput(data.output);
-      toast.success("Mission complete");
+      toast.success("Output ready");
       if (currentOrgId) {
         qc.invalidateQueries({ queryKey: ["tool_runs", currentOrgId] });
         qc.invalidateQueries({ queryKey: ["generated_assets", currentOrgId] });
         qc.invalidateQueries({ queryKey: ["usage", currentOrgId] });
       }
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Mission failed");
+      toast.error(e instanceof Error ? e.message : "Generation failed");
     } finally {
       setGenerating(false);
     }
   };
 
   const saveToAssets = async () => {
-    if (blockIfGuest("Sign up to save assets to your vault.")) return;
+    if (blockIfGuest("Sign up to save assets to your library.")) return;
     if (!currentOrgId || !user || !output) return;
     const { error } = await supabase.from("generated_assets").insert([{
       organization_id: currentOrgId,
@@ -88,78 +95,92 @@ function ToolPage() {
       content: output as never,
     }]);
     if (error) toast.error(error.message);
-    else { toast.success("Saved to vault"); qc.invalidateQueries({ queryKey: ["generated_assets", currentOrgId] }); }
+    else {
+      toast.success("Saved to library");
+      qc.invalidateQueries({ queryKey: ["generated_assets", currentOrgId] });
+    }
   };
 
   return (
     <div className="space-y-6">
       <MissionHeader
-        label="BRIEFING"
+        label="Launchpad"
         title={tool.name}
         description={tool.desc}
         actions={
           <div className="flex items-center gap-2">
             <DifficultyBadge level={tool.difficulty} />
             <StatusBadge variant="active" live />
-            <Link to="/app/launchpad" className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground">← Back</Link>
+            <Link
+              to="/app/launchpad"
+              className="text-[12px] text-muted-foreground hover:text-foreground"
+            >
+              ← Back
+            </Link>
           </div>
         }
       />
 
       <div className="grid gap-5 lg:grid-cols-2">
-        {/* Briefing / inputs */}
-        <div className="tactical-card scanlines relative overflow-hidden rounded-xl border border-border bg-card p-5">
-          <div className="relative z-[2]">
-            <div className="mission-title text-[10px]">INTEL INPUT</div>
-            <div className="mt-4 space-y-3">
-              <div>
-                <div className="mb-1.5 font-display text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Designation</div>
-                <Input className="terminal-input" placeholder="e.g. Northwind Labs" value={title} onChange={(e) => setTitle(e.target.value)} />
-              </div>
-              <div>
-                <div className="mb-1.5 font-display text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Mission Brief</div>
-                <Textarea
-                  rows={7}
-                  className="terminal-input"
-                  placeholder="> describe your idea, audience, and primary goal..."
-                  value={context}
-                  onChange={(e) => setContext(e.target.value)}
-                />
-              </div>
-              <Button onClick={handleGenerate} disabled={generating || !context} className="btn-execute w-full">
-                {generating ? <><Loader2 className="h-4 w-4 animate-spin" /> EXECUTING...</> : <><Zap className="h-4 w-4" /> EXECUTE</>}
-              </Button>
-              <div className="text-center font-display text-[10px] tracking-[0.18em] text-primary-glow">
-                REWARD: +{tool.xp} XP
-              </div>
+        {/* Inputs */}
+        <div className="rounded-xl border border-border bg-card p-5 shadow-soft">
+          <div className="text-[11.5px] font-medium text-muted-foreground">Inputs</div>
+          <div className="mt-4 space-y-4">
+            <div>
+              <div className="mb-1.5 text-[12.5px] font-medium text-foreground">Name or label</div>
+              <Input
+                placeholder="e.g. Northwind Labs"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
             </div>
+            <div>
+              <div className="mb-1.5 text-[12.5px] font-medium text-foreground">Context</div>
+              <Textarea
+                rows={7}
+                placeholder="Describe your idea, audience, and primary goal..."
+                value={context}
+                onChange={(e) => setContext(e.target.value)}
+              />
+            </div>
+            <Button
+              onClick={handleGenerate}
+              disabled={generating || !context}
+              className="w-full gap-2"
+            >
+              {generating ? (
+                <><Loader2 className="h-4 w-4 animate-spin" /> Running…</>
+              ) : (
+                <><Sparkles className="h-4 w-4" /> Run {tool.name}</>
+              )}
+            </Button>
           </div>
         </div>
 
         {/* Output */}
-        <div className="tactical-card scanlines relative min-h-[320px] overflow-hidden rounded-xl border border-border bg-card p-5">
-          <div className="relative z-[2] flex items-center justify-between">
-            <div className="mission-title text-[10px] flex items-center gap-2">
-              <Terminal className="h-3 w-3" /> OUTPUT STREAM
+        <div className="min-h-[320px] rounded-xl border border-border bg-card p-5 shadow-soft">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-[11.5px] font-medium text-muted-foreground">
+              <FileText className="h-3.5 w-3.5" /> Output
             </div>
             {output && (
               <Button size="sm" variant="outline" onClick={saveToAssets} className="gap-1.5">
-                <Save className="h-3.5 w-3.5" /> Save to Vault
+                <Save className="h-3.5 w-3.5" /> Save to library
               </Button>
             )}
           </div>
 
           {!output && !generating && (
-            <div className="relative z-[2] mt-12 text-center text-sm text-muted-foreground">
-              <div className="mx-auto mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-primary">
-                <Terminal className="h-4 w-4" />
+            <div className="mt-12 text-center text-sm text-muted-foreground">
+              <div className="mx-auto mb-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <FileText className="h-4 w-4" />
               </div>
-              <div>Awaiting mission execution.</div>
+              <div>Your output will appear here.</div>
             </div>
           )}
 
           {generating && (
-            <div className="relative z-[2] mt-6 space-y-2 animate-pulse">
+            <div className="mt-6 space-y-2 animate-pulse">
               <div className="h-3 w-3/4 rounded bg-muted" />
               <div className="h-3 w-full rounded bg-muted" />
               <div className="h-3 w-5/6 rounded bg-muted" />
@@ -168,7 +189,7 @@ function ToolPage() {
           )}
 
           {output && (
-            <pre className="relative z-[2] mt-4 max-h-[420px] overflow-auto rounded-md border border-primary/20 bg-background/60 p-3 font-mono text-xs leading-relaxed text-foreground/90">
+            <pre className="mt-4 max-h-[420px] overflow-auto rounded-lg border border-border bg-muted/30 p-3 font-mono text-xs leading-relaxed text-foreground/90">
               <span className="caret">{typed}</span>
             </pre>
           )}

@@ -1,7 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { MissionHeader, StatusBadge, DifficultyBadge } from "@/components/app/MissionHeader";
 import { launchpadCatalog } from "@/lib/mock";
-import { Lock, Rocket, Zap, Target, Megaphone, Settings2, Mail, Globe, Swords, Tags, LineChart } from "lucide-react";
+import {
+  Lock, Rocket, Zap, Target, Megaphone, Settings2, Mail, Globe, Swords, Tags, LineChart,
+  ArrowUpRight,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/app/launchpad/")({ component: LaunchpadOverview });
@@ -23,12 +26,15 @@ function LaunchpadOverview() {
   return (
     <div className="space-y-7">
       <MissionHeader
-        label="LAUNCHPAD"
-        title="AI Tools Arsenal"
-        description="Deploy AI specialists. Each mission generates a battle-ready asset for your operation."
+        label="Launchpad"
+        title="AI tools for founders"
+        description="Each tool generates a polished, ready-to-use asset for your business."
         actions={
-          <Link to="/app/launchpad/history" className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground">
-            View History →
+          <Link
+            to="/app/launchpad/history"
+            className="text-[12px] font-medium text-muted-foreground hover:text-foreground"
+          >
+            View history →
           </Link>
         }
       />
@@ -37,20 +43,21 @@ function LaunchpadOverview() {
         {launchpadCatalog.map((tool) => {
           const Icon = ICONS[tool.key] ?? Rocket;
           const locked = !tool.wired;
+
           const card = (
             <div
               className={cn(
-                "tactical-card scanlines relative h-full overflow-hidden rounded-xl border border-border bg-card p-5",
-                locked && "opacity-90"
+                "tactical-card relative h-full overflow-hidden rounded-xl border border-border bg-card p-5 shadow-soft",
+                locked && "opacity-95",
               )}
             >
-              <div className="relative z-[2] flex items-start justify-between gap-3">
+              <div className="flex items-start justify-between gap-3">
                 <div
                   className={cn(
-                    "flex h-11 w-11 items-center justify-center rounded-lg border",
+                    "flex h-10 w-10 items-center justify-center rounded-lg",
                     locked
-                      ? "border-muted-foreground/20 bg-muted/40 text-muted-foreground"
-                      : "border-primary/30 bg-primary/10 text-primary"
+                      ? "bg-muted text-muted-foreground"
+                      : "bg-primary/10 text-primary",
                   )}
                 >
                   {locked ? <Lock className="h-5 w-5" /> : <Icon className="h-5 w-5" />}
@@ -58,16 +65,23 @@ function LaunchpadOverview() {
                 <StatusBadge variant={locked ? "soon" : "active"} live={!locked} />
               </div>
 
-              <div className="relative z-[2] mt-4">
-                <div className="font-display text-base font-semibold tracking-tight">{tool.name}</div>
-                <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{tool.desc}</p>
+              <div className="mt-4">
+                <div className="font-display text-[15px] font-semibold tracking-tight">
+                  {tool.name}
+                </div>
+                <p className="mt-1 line-clamp-2 text-[13px] text-muted-foreground">{tool.desc}</p>
               </div>
 
-              <div className="relative z-[2] mt-5 flex items-center justify-between">
+              <div className="mt-5 flex items-center justify-between">
                 <DifficultyBadge level={tool.difficulty} />
-                <span className="font-display text-[11px] font-bold tracking-[0.18em] text-primary-glow">
-                  +{tool.xp} XP
-                </span>
+                {!locked && (
+                  <span className="inline-flex items-center gap-1 text-[12px] font-medium text-primary">
+                    Open <ArrowUpRight className="h-3.5 w-3.5" />
+                  </span>
+                )}
+                {locked && (
+                  <span className="text-[11.5px] text-muted-foreground">Scale plan</span>
+                )}
               </div>
             </div>
           );
@@ -75,13 +89,18 @@ function LaunchpadOverview() {
           return locked ? (
             <div
               key={tool.key}
-              title="Unlocks on the Scale plan"
+              title="Available on the Scale plan"
               className="cursor-not-allowed"
             >
               {card}
             </div>
           ) : (
-            <Link key={tool.key} to="/app/launchpad/$tool" params={{ tool: tool.key }} className="block">
+            <Link
+              key={tool.key}
+              to="/app/launchpad/$tool"
+              params={{ tool: tool.key }}
+              className="block"
+            >
               {card}
             </Link>
           );

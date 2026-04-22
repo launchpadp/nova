@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Crosshair, Plus, Search, Trash2 } from "lucide-react";
+import { Inbox, Plus, Search, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { blockIfGuest } from "@/lib/guest";
 
@@ -21,12 +21,12 @@ const STAGES = ["New", "Contacted", "Qualified", "Proposal", "Won", "Lost"] as c
 type Stage = (typeof STAGES)[number];
 
 const STAGE_COLOR: Record<Stage, string> = {
-  New: "bg-blue-500/15 text-blue-400 border-blue-500/30",
-  Contacted: "bg-yellow-500/15 text-yellow-400 border-yellow-500/30",
-  Qualified: "bg-primary/15 text-primary-glow border-primary/30",
-  Proposal: "bg-purple-500/15 text-purple-400 border-purple-500/30",
-  Won: "bg-success/15 text-success border-success/30",
-  Lost: "bg-destructive/15 text-destructive border-destructive/30",
+  New:       "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30",
+  Contacted: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30",
+  Qualified: "bg-primary/10 text-primary border-primary/30",
+  Proposal:  "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/30",
+  Won:       "bg-success/10 text-success border-success/30",
+  Lost:      "bg-destructive/10 text-destructive border-destructive/30",
 };
 
 const PLAN_LIMIT: Record<string, number> = { starter: 50, launch: 250, operate: 2000, scale: 10000 };
@@ -68,32 +68,36 @@ function LeadsPage() {
     if (blockIfGuest("Sign up to manage your real pipeline.")) return;
     const { error } = await supabase.from("leads").delete().eq("id", id);
     if (error) toast.error(error.message);
-    else { toast.success("Target removed"); qc.invalidateQueries({ queryKey: ["leads", currentOrgId] }); }
+    else { toast.success("Lead removed"); qc.invalidateQueries({ queryKey: ["leads", currentOrgId] }); }
   };
 
   return (
     <div className="space-y-6">
       <MissionHeader
-        label="INTELLIGENCE — LEAD TRACKER"
-        title="Target Pipeline"
-        description="Every lead is a target. Track, qualify, and close."
+        label="Leads"
+        title="Pipeline"
+        description="Track every prospect from first touch to close."
         actions={
-          <Button onClick={() => { if (!blockIfGuest("Sign up to start tracking real leads.")) setOpenAdd(true); }} className="btn-execute gap-2">
-            <Plus className="h-4 w-4" /> ADD TARGET
+          <Button
+            onClick={() => { if (!blockIfGuest("Sign up to start tracking real leads.")) setOpenAdd(true); }}
+            className="gap-2"
+          >
+            <Plus className="h-4 w-4" /> Add lead
           </Button>
         }
       />
 
       {/* Lead count vs plan */}
-      <div className="tactical-card scanlines relative overflow-hidden rounded-xl border border-border bg-card p-4">
-        <div className="relative z-[2] flex items-center justify-between gap-4">
+      <div className="rounded-xl border border-border bg-card p-4 shadow-soft">
+        <div className="flex items-center justify-between gap-4">
           <div>
-            <div className="mission-title text-[10px]">CAPACITY</div>
-            <div className="mt-1 font-display text-xl font-semibold">
-              {leads.length} <span className="text-muted-foreground text-sm">/ {limit} targets</span>
+            <div className="text-[11.5px] font-medium text-muted-foreground">Capacity</div>
+            <div className="mt-1 font-display text-[18px] font-semibold">
+              {leads.length}{" "}
+              <span className="text-sm font-normal text-muted-foreground">/ {limit} leads</span>
             </div>
           </div>
-          <div className="w-1/2">
+          <div className="w-1/2 max-w-xs">
             <XpBar value={usagePct} />
           </div>
         </div>
@@ -106,8 +110,8 @@ function LeadsPage() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search targets..."
-            className="terminal-input pl-9"
+            placeholder="Search leads..."
+            className="pl-9"
           />
         </div>
         <Select value={stageFilter} onValueChange={setStageFilter}>
@@ -121,24 +125,27 @@ function LeadsPage() {
 
       {/* Table or empty */}
       {filtered.length === 0 ? (
-        <div className="tactical-card scanlines relative rounded-xl border border-dashed border-border bg-card p-12 text-center">
-          <div className="relative z-[2]">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl border border-primary/30 bg-primary/10 text-primary">
-              <Crosshair className="h-6 w-6" />
-            </div>
-            <h2 className="mt-4 font-display text-lg font-semibold">No targets acquired yet</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Add your first target to start tracking the pipeline.</p>
-            <Button onClick={() => { if (!blockIfGuest("Sign up to start tracking real leads.")) setOpenAdd(true); }} className="btn-execute mt-4 gap-2">
-              <Plus className="h-4 w-4" /> ADD TARGET
-            </Button>
+        <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <Inbox className="h-6 w-6" />
           </div>
+          <h2 className="mt-4 font-display text-lg font-semibold">No leads yet</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Add your first lead to start tracking the pipeline.
+          </p>
+          <Button
+            onClick={() => { if (!blockIfGuest("Sign up to start tracking real leads.")) setOpenAdd(true); }}
+            className="mt-4 gap-2"
+          >
+            <Plus className="h-4 w-4" /> Add lead
+          </Button>
         </div>
       ) : (
-        <div className="tactical-card scanlines relative overflow-hidden rounded-xl border border-border bg-card">
-          <div className="relative z-[2] overflow-x-auto">
+        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-soft">
+          <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border/60 text-left font-display text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              <thead className="bg-muted/40">
+                <tr className="border-b border-border text-left text-[11.5px] font-medium text-muted-foreground">
                   <th className="px-4 py-3">Name</th>
                   <th className="px-4 py-3">Email</th>
                   <th className="px-4 py-3">Phone</th>
@@ -150,13 +157,24 @@ function LeadsPage() {
               </thead>
               <tbody>
                 {filtered.map((l) => (
-                  <tr key={l.id} className="border-b border-border/40 transition hover:bg-primary/5">
+                  <tr
+                    key={l.id}
+                    className="border-b border-border/60 transition last:border-b-0 hover:bg-muted/30"
+                  >
                     <td className="px-4 py-3 font-medium">{l.name}</td>
                     <td className="px-4 py-3 text-muted-foreground">{l.email ?? "—"}</td>
                     <td className="px-4 py-3 text-muted-foreground">{l.phone ?? "—"}</td>
                     <td className="px-4 py-3">
-                      <Select value={l.stage as string} onValueChange={(v) => updateStage(l.id, v as Stage)}>
-                        <SelectTrigger className={cn("h-7 w-32 border font-display text-[10px] font-bold uppercase tracking-[0.14em]", STAGE_COLOR[l.stage as Stage])}>
+                      <Select
+                        value={l.stage as string}
+                        onValueChange={(v) => updateStage(l.id, v as Stage)}
+                      >
+                        <SelectTrigger
+                          className={cn(
+                            "h-7 w-32 border text-[11.5px] font-medium",
+                            STAGE_COLOR[l.stage as Stage],
+                          )}
+                        >
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -165,9 +183,16 @@ function LeadsPage() {
                       </Select>
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">{l.source ?? "—"}</td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground">{new Date(l.created_at).toLocaleDateString()}</td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground">
+                      {new Date(l.created_at).toLocaleDateString()}
+                    </td>
                     <td className="px-4 py-3 text-right">
-                      <Button size="sm" variant="ghost" onClick={() => deleteLead(l.id)} className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => deleteLead(l.id)}
+                        className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+                      >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </td>
@@ -191,7 +216,7 @@ function LeadsPage() {
           });
           if (error) toast.error(error.message);
           else {
-            toast.success("Target acquired");
+            toast.success("Lead added");
             qc.invalidateQueries({ queryKey: ["leads", currentOrgId] });
             setOpenAdd(false);
           }
@@ -218,7 +243,13 @@ function AddLeadDialog({
   const submit = async () => {
     if (!name.trim()) { toast.error("Name required"); return; }
     setBusy(true);
-    await onCreate({ name, email: email || undefined, phone: phone || undefined, source: source || undefined, notes: notes || undefined });
+    await onCreate({
+      name,
+      email: email || undefined,
+      phone: phone || undefined,
+      source: source || undefined,
+      notes: notes || undefined,
+    });
     setBusy(false);
     setName(""); setEmail(""); setPhone(""); setSource(""); setNotes("");
   };
@@ -227,22 +258,37 @@ function AddLeadDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <div className="mission-title text-[10px]">ACQUIRE NEW TARGET</div>
-          <DialogTitle className="font-display text-xl">Mission Profile</DialogTitle>
-          <DialogDescription>Add a new lead to your pipeline.</DialogDescription>
+          <DialogTitle className="font-display text-[18px]">Add a new lead</DialogTitle>
+          <DialogDescription>
+            Capture a prospect and start tracking them through your pipeline.
+          </DialogDescription>
         </DialogHeader>
         <div className="grid gap-3">
-          <Field label="Name *"><Input className="terminal-input" value={name} onChange={(e) => setName(e.target.value)} /></Field>
+          <Field label="Name *">
+            <Input value={name} onChange={(e) => setName(e.target.value)} />
+          </Field>
           <div className="grid gap-3 sm:grid-cols-2">
-            <Field label="Email"><Input className="terminal-input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></Field>
-            <Field label="Phone"><Input className="terminal-input" value={phone} onChange={(e) => setPhone(e.target.value)} /></Field>
+            <Field label="Email">
+              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            </Field>
+            <Field label="Phone">
+              <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
+            </Field>
           </div>
-          <Field label="Source"><Input className="terminal-input" placeholder="e.g. LinkedIn, referral" value={source} onChange={(e) => setSource(e.target.value)} /></Field>
-          <Field label="Notes"><Textarea className="terminal-input" rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} /></Field>
+          <Field label="Source">
+            <Input
+              placeholder="e.g. LinkedIn, referral"
+              value={source}
+              onChange={(e) => setSource(e.target.value)}
+            />
+          </Field>
+          <Field label="Notes">
+            <Textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} />
+          </Field>
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button onClick={submit} disabled={busy} className="btn-execute">DEPLOY TARGET</Button>
+          <Button onClick={submit} disabled={busy}>Add lead</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -252,7 +298,7 @@ function AddLeadDialog({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <div className="mb-1.5 font-display text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">{label}</div>
+      <div className="mb-1.5 text-[12.5px] font-medium text-foreground">{label}</div>
       {children}
     </label>
   );
