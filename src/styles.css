@@ -4,12 +4,16 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ───────────────────────────── Theme bindings ───────────────────────────── */
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --radius-2xl: calc(var(--radius) + 8px);
+  /* Radii — spec */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius: var(--radius-md);
+
+  /* Colors mapped to CSS variables (set per-mode below) */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -35,13 +39,24 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-ring-offset-background: var(--background);
+
+  /* Workspace signals */
   --color-launchpad: var(--launchpad);
   --color-nova: var(--nova);
+
+  /* Surfaces — exposed as utilities (bg-surface, bg-surface-2, …) */
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-offset: var(--surface-offset);
+
+  /* Charts */
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+
+  /* Sidebar */
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -50,202 +65,288 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  --font-sans:
-    "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-display:
-    "Inter Display", "Inter", ui-sans-serif, system-ui, sans-serif;
 
-  --shadow-soft: 0 1px 2px 0 oklch(0 0 0 / 0.04), 0 1px 2px 0 oklch(0 0 0 / 0.06);
-  --shadow-elevated: 0 4px 16px -6px oklch(0 0 0 / 0.10), 0 2px 4px -2px oklch(0 0 0 / 0.06);
-  --shadow-glow: 0 0 0 1px color-mix(in oklab, var(--primary) 18%, transparent),
-                 0 6px 20px -8px color-mix(in oklab, var(--primary) 22%, transparent);
+  /* Typography */
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Fluid type scale */
+  --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+  --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+  --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+
+  /* Shadows — spec */
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.2);
+  --shadow-hover: 0 2px 6px rgba(0, 0, 0, 0.5), 0 16px 40px rgba(0, 0, 0, 0.3);
+  --shadow-glow-primary: 0 0 0 1px rgba(108, 99, 255, 0.3), 0 4px 24px rgba(108, 99, 255, 0.15);
+  --shadow-glow-secondary: 0 0 0 1px rgba(0, 212, 170, 0.3), 0 4px 24px rgba(0, 212, 170, 0.12);
+
+  /* Legacy aliases (kept so older components keep rendering) */
+  --shadow-soft: 0 1px 2px 0 rgba(0, 0, 0, 0.18);
+  --shadow-elevated: var(--shadow-card);
+  --shadow-glow: var(--shadow-glow-primary);
 }
 
-/* ───────────────────────────── Light theme ───────────────────────────── */
+/* ───────────────────────────── Dark theme (default — spec) ───────────────────────────── */
 :root {
-  --radius: 0.625rem;
+  /* Surfaces */
+  --background: #0a0a0b;
+  --foreground: #f0f0f2;
+  --surface: #111113;
+  --surface-2: #16161a;
+  --surface-offset: #1c1c22;
 
-  /* Cyan — primary brand accent (matches Launchpad Nova logo) */
-  --primary: oklch(0.72 0.14 215);
-  --primary-foreground: oklch(0.14 0.02 250);
-  --primary-glow: oklch(0.82 0.13 210);
+  --card: var(--surface);
+  --card-foreground: var(--foreground);
+  --popover: var(--surface);
+  --popover-foreground: var(--foreground);
 
-  --background: oklch(0.985 0.005 240);
-  --foreground: oklch(0.16 0.02 250);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.16 0.02 250);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.16 0.02 250);
+  /* Brand */
+  --primary: #6c63ff;
+  --primary-foreground: #ffffff;
+  --primary-hover: #7c75ff;
+  --primary-glow: rgba(108, 99, 255, 0.15);
 
-  --secondary: oklch(0.96 0.008 230);
-  --secondary-foreground: oklch(0.22 0.02 250);
-  --muted: oklch(0.965 0.006 230);
-  --muted-foreground: oklch(0.50 0.015 245);
-  --accent: oklch(0.95 0.025 215);
-  --accent-foreground: oklch(0.30 0.08 230);
+  --secondary: var(--surface-2);
+  --secondary-foreground: var(--foreground);
+  --accent: #00d4aa;
+  --accent-foreground: #07120e;
+  --accent-glow: rgba(0, 212, 170, 0.12);
 
-  --destructive: oklch(0.58 0.22 27);
-  --destructive-foreground: oklch(0.99 0.005 27);
-  --success: oklch(0.60 0.14 160);
-  --success-foreground: oklch(0.99 0.005 160);
-  /* Warning uses the orange rocket-flame accent */
-  --warning: oklch(0.72 0.18 45);
-  --warning-foreground: oklch(0.16 0.02 45);
+  --muted: var(--surface-2);
+  --muted-foreground: #7a7a8a;
+  --text-faint: #3a3a4a;
 
-  --border: oklch(0.91 0.008 240);
-  --input: oklch(0.91 0.008 240);
-  --ring: oklch(0.72 0.14 215);
+  /* Status */
+  --success: #10b981;
+  --success-foreground: #04140d;
+  --warning: #f59e0b;
+  --warning-foreground: #1a1208;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
 
-  --launchpad: oklch(0.72 0.14 215);
-  --nova: oklch(0.72 0.14 215);
+  /* Borders / inputs */
+  --border: rgba(255, 255, 255, 0.07);
+  --border-subtle: rgba(255, 255, 255, 0.04);
+  --input: rgba(255, 255, 255, 0.07);
+  --ring: #6c63ff;
 
-  --chart-1: oklch(0.72 0.14 215);
-  --chart-2: oklch(0.82 0.13 210);
-  --chart-3: oklch(0.72 0.18 45);
-  --chart-4: oklch(0.60 0.14 160);
-  --chart-5: oklch(0.58 0.22 27);
+  /* Workspace signals */
+  --launchpad: #6c63ff;
+  --nova: #00d4aa;
 
-  --sidebar: oklch(0.985 0.005 240);
-  --sidebar-foreground: oklch(0.22 0.02 250);
-  --sidebar-primary: oklch(0.72 0.14 215);
-  --sidebar-primary-foreground: oklch(0.14 0.02 250);
-  --sidebar-accent: oklch(0.95 0.025 215);
-  --sidebar-accent-foreground: oklch(0.30 0.08 230);
-  --sidebar-border: oklch(0.91 0.008 240);
-  --sidebar-ring: oklch(0.72 0.14 215);
+  /* Charts (teal-leaning for Nova reports per spec) */
+  --chart-1: #00d4aa;
+  --chart-2: #6c63ff;
+  --chart-3: #f59e0b;
+  --chart-4: #38bdf8;
+  --chart-5: #ef4444;
+
+  /* Sidebar — slightly deeper than background for separation */
+  --sidebar: #0c0c0e;
+  --sidebar-foreground: #f0f0f2;
+  --sidebar-primary: #6c63ff;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #16161a;
+  --sidebar-accent-foreground: #f0f0f2;
+  --sidebar-border: rgba(255, 255, 255, 0.06);
+  --sidebar-ring: #6c63ff;
 }
 
-/* ───────────────────────────── Dark theme (logo-matched) ───────────────────────────── */
-.dark {
-  /* Deep navy-black, like the logo card */
-  --background: oklch(0.14 0.022 260);
-  --foreground: oklch(0.96 0.008 230);
-  --card: oklch(0.18 0.025 260);
-  --card-foreground: oklch(0.96 0.008 230);
-  --popover: oklch(0.19 0.025 260);
-  --popover-foreground: oklch(0.96 0.008 230);
+/* ───────────────────────────── Light theme (derived) ───────────────────────────── */
+.light {
+  --background: #fafafb;
+  --foreground: #0f0f12;
+  --surface: #ffffff;
+  --surface-2: #f4f4f7;
+  --surface-offset: #ececf2;
 
-  /* Bright cyan, like the logo wordmark */
-  --primary: oklch(0.84 0.14 210);
-  --primary-foreground: oklch(0.12 0.025 260);
-  --primary-glow: oklch(0.90 0.12 205);
+  --card: var(--surface);
+  --card-foreground: var(--foreground);
+  --popover: var(--surface);
+  --popover-foreground: var(--foreground);
 
-  --secondary: oklch(0.22 0.025 260);
-  --secondary-foreground: oklch(0.96 0.008 230);
-  --muted: oklch(0.21 0.022 260);
-  --muted-foreground: oklch(0.70 0.018 230);
-  --accent: oklch(0.26 0.05 220);
-  --accent-foreground: oklch(0.96 0.008 230);
+  --primary: #6c63ff;
+  --primary-foreground: #ffffff;
+  --primary-hover: #5a52e6;
+  --primary-glow: rgba(108, 99, 255, 0.18);
 
-  --destructive: oklch(0.62 0.20 27);
-  --destructive-foreground: oklch(0.98 0.005 27);
-  --success: oklch(0.72 0.14 160);
-  --success-foreground: oklch(0.14 0.02 160);
-  /* Orange rocket flame */
-  --warning: oklch(0.78 0.18 50);
-  --warning-foreground: oklch(0.16 0.02 45);
+  --secondary: var(--surface-2);
+  --secondary-foreground: var(--foreground);
+  --accent: #00b894;
+  --accent-foreground: #ffffff;
 
-  --border: oklch(1 0 0 / 9%);
-  --input: oklch(1 0 0 / 11%);
-  --ring: oklch(0.84 0.14 210);
+  --muted: var(--surface-2);
+  --muted-foreground: #6a6a78;
 
-  --launchpad: oklch(0.84 0.14 210);
-  --nova: oklch(0.84 0.14 210);
+  --success: #059669;
+  --warning: #d97706;
+  --destructive: #dc2626;
 
-  --chart-1: oklch(0.84 0.14 210);
-  --chart-2: oklch(0.90 0.12 205);
-  --chart-3: oklch(0.78 0.18 50);
-  --chart-4: oklch(0.72 0.14 160);
-  --chart-5: oklch(0.62 0.20 27);
+  --border: rgba(15, 15, 18, 0.08);
+  --border-subtle: rgba(15, 15, 18, 0.05);
+  --input: rgba(15, 15, 18, 0.10);
+  --ring: #6c63ff;
 
-  --sidebar: oklch(0.16 0.025 260);
-  --sidebar-foreground: oklch(0.92 0.008 230);
-  --sidebar-primary: oklch(0.84 0.14 210);
-  --sidebar-primary-foreground: oklch(0.12 0.025 260);
-  --sidebar-accent: oklch(0.24 0.04 220);
-  --sidebar-accent-foreground: oklch(0.96 0.008 230);
-  --sidebar-border: oklch(1 0 0 / 8%);
-  --sidebar-ring: oklch(0.84 0.14 210);
+  --launchpad: #6c63ff;
+  --nova: #00b894;
+
+  --chart-1: #00b894;
+  --chart-2: #6c63ff;
+  --chart-3: #d97706;
+  --chart-4: #0284c7;
+  --chart-5: #dc2626;
+
+  --sidebar: #ffffff;
+  --sidebar-foreground: #0f0f12;
+  --sidebar-primary: #6c63ff;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f4f4f7;
+  --sidebar-accent-foreground: #0f0f12;
+  --sidebar-border: rgba(15, 15, 18, 0.06);
+  --sidebar-ring: #6c63ff;
 }
 
+/* ───────────────────────────── Base ───────────────────────────── */
 @layer base {
   * { border-color: var(--color-border); }
-
   html, body { height: 100%; }
-
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
-
-  h1, h2, h3, h4 {
+  h1, h2, h3, h4, h5 {
     font-family: var(--font-display);
     letter-spacing: -0.018em;
+    font-weight: 600;
   }
+  ::selection { background: color-mix(in oklab, var(--primary) 35%, transparent); color: var(--foreground); }
 }
 
 /* ───────────────────────────── Utilities ───────────────────────────── */
 @layer utilities {
+  .font-mono { font-family: var(--font-mono); }
+
+  /* Glassy panel */
   .glass {
-    background-color: color-mix(in oklab, var(--card) 80%, transparent);
-    backdrop-filter: blur(12px) saturate(140%);
-    -webkit-backdrop-filter: blur(12px) saturate(140%);
+    background-color: color-mix(in oklab, var(--surface) 70%, transparent);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
   }
-  .glow-primary { box-shadow: var(--shadow-glow); }
+
+  /* Brand gradient text */
+  .text-gradient-brand {
+    background: linear-gradient(110deg, #6c63ff 0%, #9b8bff 40%, #00d4aa 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  /* Backwards compat */
   .text-gradient {
-    background: linear-gradient(135deg, var(--primary), var(--primary-glow));
+    background: linear-gradient(110deg, #6c63ff 0%, #00d4aa 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
   .bg-gradient-primary {
-    background: linear-gradient(135deg, var(--primary), var(--primary-glow));
+    background: linear-gradient(135deg, #6c63ff, #7c75ff);
   }
-  .ring-grid {
+
+  /* Subtle grid background — used on auth + onboarding */
+  .bg-grid-faint {
     background-image:
-      linear-gradient(to right, color-mix(in oklab, var(--foreground) 4%, transparent) 1px, transparent 1px),
-      linear-gradient(to bottom, color-mix(in oklab, var(--foreground) 4%, transparent) 1px, transparent 1px);
-    background-size: 32px 32px;
+      linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    background-size: 48px 48px;
+    background-position: -1px -1px;
+  }
+
+  /* Glow helpers */
+  .glow-primary { box-shadow: var(--shadow-glow-primary); }
+  .glow-secondary { box-shadow: var(--shadow-glow-secondary); }
+  .shadow-card { box-shadow: var(--shadow-card); }
+  .shadow-hover { box-shadow: var(--shadow-hover); }
+
+  /* Skeleton shimmer */
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--surface-2) 0%,
+      var(--surface-offset) 50%,
+      var(--surface-2) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.6s ease-in-out infinite;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Animated brand gradient (used on auth hero text) */
+  @keyframes brandShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  .text-brand-cycle {
+    background: linear-gradient(110deg, #6c63ff 0%, #9b8bff 35%, #00d4aa 70%, #6c63ff 100%);
+    background-size: 250% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: brandShift 8s ease-in-out infinite;
   }
 }
 
-/* Page transition */
+/* ───────────────────────────── Page transition ───────────────────────────── */
 @keyframes pageIn {
   from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.page-in { animation: pageIn 0.22s ease-out both; }
+.page-in { animation: pageIn 0.20s cubic-bezier(0.16, 1, 0.3, 1) both; }
 
-/* ───────────────────────────── Premium SaaS components ─────────────────────────────
-   Note: legacy class names (.tactical-card, .scanlines, .mission-title, .xp-bar,
-   .btn-execute, .terminal-input, .boot-grid, .glow-border, .caret) are kept so
-   existing pages render in the new calm style without per-file rewrites. */
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.animate-scale-in { animation: scaleIn 0.18s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ───────────────────────────── Legacy class aliases ─────────────────────────────
+   Kept so older pages (Launchpad tools, Nova screens) keep rendering until
+   they are individually rebuilt in the next pass. */
 @layer utilities {
-  /* Subtle no-op — kept for backward compat, no scanlines */
   .scanlines { position: relative; }
 
-  /* Card with refined hover — soft lift, no glow pulse */
   .tactical-card {
     position: relative;
-    transition:
-      transform 0.18s ease,
-      box-shadow 0.18s ease,
-      border-color 0.18s ease;
+    transition: transform 180ms cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 180ms cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 180ms cubic-bezier(0.16, 1, 0.3, 1);
   }
   .tactical-card:hover {
-    transform: translateY(-1px);
-    border-color: color-mix(in oklab, var(--foreground) 14%, transparent);
-    box-shadow: var(--shadow-elevated);
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: var(--shadow-hover);
   }
 
-  /* Section eyebrow — clean, no "MISSION:" tactical look */
   .mission-title {
     font-family: var(--font-sans);
-    font-size: 0.70rem;
+    font-size: 0.7rem;
     font-weight: 600;
     letter-spacing: 0.10em;
     text-transform: uppercase;
@@ -254,26 +355,21 @@
     align-items: center;
     gap: 0.5rem;
   }
-  .mission-title::before { content: none; }
 
-  /* Progress bar — flat, smooth, not "XP" */
   .xp-bar {
     position: relative;
     height: 6px;
     border-radius: 999px;
-    background: color-mix(in oklab, var(--foreground) 8%, transparent);
+    background: var(--surface-2);
     overflow: hidden;
-    border: none;
   }
   .xp-bar > .xp-fill {
     height: 100%;
     background: var(--primary);
-    box-shadow: none;
     border-radius: 999px;
     transition: width 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 
-  /* Status chip — clean SaaS pill */
   .status-badge {
     display: inline-flex;
     align-items: center;
@@ -283,80 +379,53 @@
     font-family: var(--font-sans);
     font-size: 0.68rem;
     font-weight: 500;
-    letter-spacing: 0.02em;
-    text-transform: none;
     border: 1px solid color-mix(in oklab, currentColor 30%, transparent);
     background: color-mix(in oklab, currentColor 10%, transparent);
   }
   .status-badge .dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 999px;
-    background: currentColor;
-    box-shadow: none;
+    width: 6px; height: 6px; border-radius: 999px; background: currentColor;
   }
-  .status-active { color: var(--success); }
-  .status-online { color: var(--success); }
-  .status-standby { color: var(--muted-foreground); }
-  .status-locked { color: var(--muted-foreground); }
-  .status-soon { color: var(--muted-foreground); }
-
-  /* Soft pulse for live indicator (no glow) */
-  @keyframes pulse-soft {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-  }
+  .status-active, .status-online { color: var(--success); }
+  .status-standby, .status-locked, .status-soon { color: var(--muted-foreground); }
+  @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
   .status-badge .dot.live { animation: pulse-soft 2s ease-in-out infinite; }
 
-  /* Subtle ring instead of glow */
-  .glow-border {
-    box-shadow: 0 0 0 1px color-mix(in oklab, var(--primary) 35%, transparent);
-  }
+  .glow-border { box-shadow: 0 0 0 1px rgba(108, 99, 255, 0.3); }
 
-  /* Plain input — no terminal styling */
   .terminal-input {
     font-family: var(--font-sans);
-    background: var(--background);
+    background: var(--surface-2);
     border: 1px solid var(--border);
     color: var(--foreground);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-sm);
   }
-  .terminal-input::placeholder {
-    color: var(--muted-foreground);
-  }
+  .terminal-input::placeholder { color: var(--muted-foreground); }
   .terminal-input:focus-visible {
     outline: none;
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 18%, transparent);
+    box-shadow: 0 0 0 3px var(--primary-glow);
   }
 
-  /* Primary action button — solid teal, no neon */
   .btn-execute {
     background: var(--primary);
     color: var(--primary-foreground);
     font-family: var(--font-sans);
-    letter-spacing: 0;
-    text-transform: none;
     font-weight: 500;
-    box-shadow: var(--shadow-soft);
-    transition: background-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+    transition: background-color 180ms, box-shadow 180ms, transform 180ms;
   }
   .btn-execute:hover {
-    background: color-mix(in oklab, var(--primary) 88%, black);
-    box-shadow: var(--shadow-elevated);
+    background: var(--primary-hover);
+    box-shadow: var(--shadow-glow-primary);
   }
-  .btn-execute:active {
-    transform: translateY(1px);
-  }
+  .btn-execute:active { transform: scale(0.98); }
 
-  /* Onboarding background — calm gradient, no boot grid */
   .boot-grid {
     background-color: var(--background);
     background-image:
-      radial-gradient(50rem 30rem at 50% -10%, color-mix(in oklab, var(--primary) 8%, transparent), transparent 60%);
+      radial-gradient(60rem 36rem at 50% -10%, rgba(108, 99, 255, 0.10), transparent 60%),
+      radial-gradient(48rem 30rem at 90% 110%, rgba(0, 212, 170, 0.08), transparent 60%);
   }
 
-  /* Caret used in tool output — subtle */
   @keyframes caret-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
   .caret::after {
     content: "▌";
@@ -365,7 +434,6 @@
     animation: caret-blink 1s steps(2) infinite;
   }
 
-  /* Subtle row hover for sticky lists */
-  .lift-on-hover { transition: background-color 0.15s ease; }
-  .lift-on-hover:hover { background-color: color-mix(in oklab, var(--foreground) 3%, transparent); }
+  .lift-on-hover { transition: background-color 180ms cubic-bezier(0.16, 1, 0.3, 1); }
+  .lift-on-hover:hover { background-color: var(--surface-offset); }
 }
