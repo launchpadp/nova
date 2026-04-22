@@ -1,5 +1,4 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
 import {
@@ -65,23 +64,6 @@ function Dashboard() {
   const leadsQ  = useQuery({ ...leadsQuery(currentOrgId ?? ""),              enabled: !!currentOrgId });
   const intsQ   = useQuery({ ...integrationsQuery(user?.id ?? ""),           enabled: !!user?.id });
 
-  if (!currentOrgId) {
-    return (
-      <div className="rounded-xl border border-border bg-card p-10 text-center shadow-soft">
-        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-          <Sparkles className="h-6 w-6" />
-        </div>
-        <h2 className="mt-4 text-xl font-semibold">
-          Welcome{profile?.full_name ? `, ${profile.full_name.split(" ")[0]}` : ""}
-        </h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Finish onboarding to set up your workspace.
-        </p>
-        <Link to="/onboarding"><Button className="mt-5">Start onboarding</Button></Link>
-      </div>
-    );
-  }
-
   const org       = orgQ.data;
   const sub       = subQ.data;
   const recentRuns= runsQ.data ?? [];
@@ -100,29 +82,44 @@ function Dashboard() {
   const orgStage  = (org?.stage ?? "Idea") as StageName;
   const stageIdx  = STAGES.indexOf(orgStage);
 
-  // Compute milestone status from real signals.
+  // Compute milestone status from real signals (cheap; no memo needed).
   const has = (cat: string) => assets.some((a) => a.category === cat);
   const succeeded = (k: string) => allRuns.some((r) => r.tool_key === k && r.status === "succeeded");
 
-  const milestoneStatus: Record<string, "done" | "active" | "todo"> = useMemo(() => {
-    const s: Record<string, "done" | "active" | "todo"> = {};
-    s["validate-idea"]    = succeeded("validate-idea") ? "done" : "active";
-    s["define-offer"]     = succeeded("generate-offer") || has("generate-offer") ? "done" : "todo";
-    s["build-pitch"]      = succeeded("generate-pitch") || has("generate-pitch") ? "done" : "todo";
-    s["gtm-strategy"]     = succeeded("generate-gtm-strategy") || has("generate-gtm-strategy") ? "done" : "todo";
-    s["first-leads"]      = leads.length > 0 ? "done" : "todo";
-    s["ops-plan"]         = succeeded("generate-ops-plan") || has("generate-ops-plan") ? "done" : "todo";
-    s["automate-followup"]= integrations.some((i) => i.integration_key?.startsWith("nova:webhook:") && i.status === "connected") ? "done" : "todo";
-    s["audit-website"]    = succeeded("analyze-website") ? "done" : "todo";
-    s["connect-stack"]    = integrations.filter((i) => !i.integration_key?.startsWith("nova:webhook:") && i.value).length >= 2 ? "done"
-                          : integrations.some((i) => !i.integration_key?.startsWith("nova:webhook:") && i.value) ? "active" : "todo";
-    s["track-revenue"]    = leads.filter((l) => l.stage === "Won").length > 0 ? "done" : "todo";
+  const milestoneStatus: Record<string, "done" | "active" | "todo"> = {};
+  milestoneStatus["validate-idea"]    = succeeded("validate-idea") ? "done" : "active";
+  milestoneStatus["define-offer"]     = succeeded("generate-offer") || has("generate-offer") ? "done" : "todo";
+  milestoneStatus["build-pitch"]      = succeeded("generate-pitch") || has("generate-pitch") ? "done" : "todo";
+  milestoneStatus["gtm-strategy"]     = succeeded("generate-gtm-strategy") || has("generate-gtm-strategy") ? "done" : "todo";
+  milestoneStatus["first-leads"]      = leads.length > 0 ? "done" : "todo";
+  milestoneStatus["ops-plan"]         = succeeded("generate-ops-plan") || has("generate-ops-plan") ? "done" : "todo";
+  milestoneStatus["automate-followup"]= integrations.some((i) => i.integration_key?.startsWith("nova:webhook:") && i.status === "connected") ? "done" : "todo";
+  milestoneStatus["audit-website"]    = succeeded("analyze-website") ? "done" : "todo";
+  milestoneStatus["connect-stack"]    = integrations.filter((i) => !i.integration_key?.startsWith("nova:webhook:") && i.value).length >= 2 ? "done"
+                                      : integrations.some((i) => !i.integration_key?.startsWith("nova:webhook:") && i.value) ? "active" : "todo";
+  milestoneStatus["track-revenue"]    = leads.filter((l) => l.stage === "Won").length > 0 ? "done" : "todo";
 
-    // Promote the first todo to "active" so users always see a clear "next step".
-    const firstTodo = MILESTONES.find((m) => s[m.id] === "todo" && STAGES.indexOf(m.stage) <= stageIdx + 1);
-    if (firstTodo && !Object.values(s).includes("active")) s[firstTodo.id] = "active";
-    return s;
-  }, [allRuns, assets, leads, integrations, stageIdx]);
+  // Promote the first todo to "active" so users always see a clear "next step".
+  const firstTodo = MILESTONES.find((m) => milestoneStatus[m.id] === "todo" && STAGES.indexOf(m.stage) <= stageIdx + 1);
+  if (firstTodo && !Object.values(milestoneStatus).includes("active")) milestoneStatus[firstTodo.id] = "active";
+
+  // Render the no-org fallback AFTER all hooks are called.
+  if (!currentOrgId) {
+    return (
+      <div className="rounded-xl border border-border bg-card p-10 text-center shadow-soft">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">
+          <Sparkles className="h-6 w-6" />
+        </div>
+        <h2 className="mt-4 text-xl font-semibold">
+          Welcome{profile?.full_name ? `, ${profile.full_name.split(" ")[0]}` : ""}
+        </h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Finish onboarding to set up your workspace.
+        </p>
+        <Link to="/onboarding"><Button className="mt-5">Start onboarding</Button></Link>
+      </div>
+    );
+  }
 
   const completed   = MILESTONES.filter((m) => milestoneStatus[m.id] === "done").length;
   const journeyPct  = Math.round((completed / MILESTONES.length) * 100);
