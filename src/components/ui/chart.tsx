@@ -92,17 +92,28 @@ ${colorConfig
 
 const ChartTooltip = RechartsPrimitive.Tooltip;
 
-const ChartTooltipContent = React.forwardRef<
-  HTMLDivElement,
-  React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
-    React.ComponentProps<"div"> & {
-      hideLabel?: boolean;
-      hideIndicator?: boolean;
-      indicator?: "line" | "dot" | "dashed";
-      nameKey?: string;
-      labelKey?: string;
-    }
->(
+type TooltipPropsLoose = React.ComponentProps<"div"> & {
+  active?: boolean;
+  payload?: Array<Record<string, unknown>>;
+  label?: unknown;
+  labelFormatter?: (value: unknown, payload: unknown) => React.ReactNode;
+  labelClassName?: string;
+  formatter?: (
+    value: unknown,
+    name: unknown,
+    item: unknown,
+    index: number,
+    payload: unknown,
+  ) => React.ReactNode;
+  color?: string;
+  hideLabel?: boolean;
+  hideIndicator?: boolean;
+  indicator?: "line" | "dot" | "dashed";
+  nameKey?: string;
+  labelKey?: string;
+};
+
+const ChartTooltipContent = React.forwardRef<HTMLDivElement, TooltipPropsLoose>(
   (
     {
       active,
@@ -166,15 +177,16 @@ const ChartTooltipContent = React.forwardRef<
         {!nestLabel ? tooltipLabel : null}
         <div className="grid gap-1.5">
           {payload
-            .filter((item) => item.type !== "none")
-            .map((item, index) => {
-              const key = `${nameKey || item.name || item.dataKey || "value"}`;
+            .filter((item: Record<string, unknown>) => item.type !== "none")
+            .map((item: Record<string, unknown>, index: number) => {
+              const key = `${nameKey || (item.name as string) || (item.dataKey as string) || "value"}`;
               const itemConfig = getPayloadConfigFromPayload(config, item, key);
-              const indicatorColor = color || item.payload.fill || item.color;
+              const itemPayload = item.payload as { fill?: string } | undefined;
+              const indicatorColor = color || itemPayload?.fill || (item.color as string | undefined);
 
               return (
                 <div
-                  key={item.dataKey}
+                  key={String(item.dataKey ?? index)}
                   className={cn(
                     "flex w-full flex-wrap items-stretch gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5 [&>svg]:text-muted-foreground",
                     indicator === "dot" && "items-center",
@@ -217,12 +229,12 @@ const ChartTooltipContent = React.forwardRef<
                         <div className="grid gap-1.5">
                           {nestLabel ? tooltipLabel : null}
                           <span className="text-muted-foreground">
-                            {itemConfig?.label || item.name}
+                            {(itemConfig?.label as React.ReactNode) || (item.name as React.ReactNode)}
                           </span>
                         </div>
-                        {item.value && (
+                        {item.value !== undefined && item.value !== null && (
                           <span className="font-mono font-medium tabular-nums text-foreground">
-                            {item.value.toLocaleString()}
+                            {Number(item.value).toLocaleString()}
                           </span>
                         )}
                       </div>
