@@ -10,6 +10,7 @@ import { useGuest } from "@/lib/guest";
 import { useQuery } from "@tanstack/react-query";
 import { subscriptionQuery } from "@/lib/queries";
 import { AiOperator } from "@/components/app/AiOperator";
+import { StagePill } from "@/components/app/StagePill";
 import { cn } from "@/lib/utils";
 
 const PAGE_TITLES: Record<string, string> = {
@@ -155,6 +156,9 @@ export function AppTopbar() {
               <Zap className="h-3 w-3" /> Nova OS
             </Link>
           </div>
+
+          {/* Stage pill — visible across the app */}
+          <StagePill />
 
           {/* Plan badge */}
           <Link

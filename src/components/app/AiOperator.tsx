@@ -121,8 +121,9 @@ export function AiOperator({ open, onOpenChange }: { open: boolean; onOpenChange
           "generate-followup-sequence": "followup",
           "analyze-website": "website-audit",
         };
-        const slug = slugMap[r.tool_key] ?? r.tool_key;
+        const _slug = slugMap[r.tool_key] ?? r.tool_key;
         return {
+          _slug,
           id: `recent-${r.id}`,
           group: "Recent" as const,
           label: r.tool_key.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
