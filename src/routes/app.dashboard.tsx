@@ -1,113 +1,210 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { PageHeader } from "@/components/app/PageHeader";
-import { StageTracker } from "@/components/app/StageTracker";
 import { useAuth } from "@/lib/auth";
-import { organizationQuery, subscriptionQuery, toolRunsQuery, usageQuery, planEntitlementsQuery } from "@/lib/queries";
-import { ArrowRight, Rocket, Cpu, Sparkles, Inbox, Workflow, Users, BarChart3, Globe, Zap } from "lucide-react";
+import {
+  organizationQuery, subscriptionQuery, toolRunsQuery, usageQuery,
+  planEntitlementsQuery, generatedAssetsQuery,
+} from "@/lib/queries";
+import {
+  Sparkles, Rocket, Inbox, FolderOpen, Plus, ArrowRight, Activity,
+  CheckCircle2, XCircle, Loader2, Zap,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { Stage } from "@/lib/mock";
 
 export const Route = createFileRoute("/app/dashboard")({ component: Dashboard });
 
+function greetingFor(d = new Date()) {
+  const h = d.getHours();
+  if (h < 12) return "Good morning";
+  if (h < 18) return "Good afternoon";
+  return "Good evening";
+}
+
 function Dashboard() {
   const { currentOrgId, profile } = useAuth();
+
   const orgQ = useQuery({ ...organizationQuery(currentOrgId ?? ""), enabled: !!currentOrgId });
   const subQ = useQuery({ ...subscriptionQuery(currentOrgId ?? ""), enabled: !!currentOrgId });
-  const runsQ = useQuery({ ...toolRunsQuery(currentOrgId ?? "", 10), enabled: !!currentOrgId });
+  const runsQ = useQuery({ ...toolRunsQuery(currentOrgId ?? "", 5), enabled: !!currentOrgId });
+  const allRunsQ = useQuery({ ...toolRunsQuery(currentOrgId ?? "", 100), enabled: !!currentOrgId });
   const usageQ = useQuery({ ...usageQuery(currentOrgId ?? ""), enabled: !!currentOrgId });
   const plansQ = useQuery(planEntitlementsQuery());
+  const assetsQ = useQuery({ ...generatedAssetsQuery(currentOrgId ?? ""), enabled: !!currentOrgId });
 
   if (!currentOrgId) {
     return (
-      <div className="rounded-xl border border-border bg-card p-8 text-center">
-        <h2 className="text-lg font-semibold">Welcome{profile?.full_name ? `, ${profile.full_name}` : ""}</h2>
+      <div className="rounded-2xl border border-border bg-card p-10 text-center shadow-soft">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-primary glow-primary">
+          <Sparkles className="h-6 w-6 text-primary-foreground" />
+        </div>
+        <h2 className="mt-4 text-xl font-semibold">Welcome{profile?.full_name ? `, ${profile.full_name.split(" ")[0]}` : ""}</h2>
         <p className="mt-2 text-sm text-muted-foreground">Finish onboarding to set up your workspace.</p>
-        <Link to="/onboarding"><Button className="mt-4">Start onboarding</Button></Link>
+        <Link to="/onboarding"><Button className="mt-5">Start onboarding</Button></Link>
       </div>
     );
   }
 
   const org = orgQ.data;
   const sub = subQ.data;
-  const runs = runsQ.data ?? [];
+  const recentRuns = runsQ.data ?? [];
+  const allRuns = allRunsQ.data ?? [];
   const usage = usageQ.data ?? [];
+  const assets = assetsQ.data ?? [];
+
   const totalUsed = usage.reduce((s, r) => s + (r.count as number), 0);
   const limit = plansQ.data?.find((p) => p.plan === sub?.plan)?.monthly_generation_limit ?? null;
+  const usagePct = limit ? Math.min(100, Math.round((totalUsed / limit) * 100)) : 0;
 
-  const quickActions = [
-    { label: "Validate Idea", icon: Sparkles, to: "/app/launchpad/idea-validator" },
-    { label: "Generate Pitch", icon: Rocket, to: "/app/launchpad/pitch-generator" },
-    { label: "Build GTM", icon: Zap, to: "/app/launchpad/gtm-strategy" },
-    { label: "Build Offer", icon: Users, to: "/app/launchpad/offer" },
-    { label: "Website Audit", icon: Globe, to: "/app/launchpad/website-audit" },
-    { label: "Pipeline", icon: BarChart3, to: "/app/nova/crm" },
-    { label: "Workflows", icon: Workflow, to: "/app/nova/workflows" },
-    { label: "Leads", icon: Inbox, to: "/app/nova/leads" },
-    { label: "Clients", icon: Cpu, to: "/app/nova/clients" },
+  const firstName = (profile?.full_name || "").split(" ")[0] || "there";
+  const planLabel = sub?.plan ?? "starter";
+
+  // KPIs — assets count, runs count, leads not yet implemented
+  const kpis = [
+    { label: "AI Generations", value: totalUsed, sub: limit ? `of ${limit}` : "this month", icon: Zap, accent: "from-primary to-primary-glow" },
+    { label: "Tools Run", value: allRuns.length, sub: "all time", icon: Rocket, accent: "from-launchpad to-primary" },
+    { label: "Leads Captured", value: 0, sub: "coming soon", icon: Inbox, accent: "from-nova to-primary" },
+    { label: "Assets Created", value: assets.length, sub: "saved", icon: FolderOpen, accent: "from-primary-glow to-launchpad" },
   ];
 
   return (
-    <div className="space-y-6">
-      <PageHeader eyebrow="Command center" title={`Welcome back, ${org?.name ?? "your workspace"}`} description="Your operating system at a glance. Launchpad builds it, Nova runs it." />
-      <StageTracker current={(org?.stage as Stage) ?? "Idea"} />
-
-      <div>
-        <SectionTitle>Quick actions</SectionTitle>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
-          {quickActions.map((q) => (
-            <Link key={q.label} to={q.to} className="group flex items-center gap-2 rounded-md border border-border bg-card px-3 py-2.5 text-sm hover:border-foreground/20 hover:bg-accent transition">
-              <q.icon className="h-4 w-4 text-muted-foreground group-hover:text-foreground" />
-              <span className="truncate">{q.label}</span>
+    <div className="space-y-8">
+      {/* ── Welcome banner ── */}
+      <section className="relative overflow-hidden rounded-2xl border border-border bg-card p-6 md:p-8">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-launchpad/10" aria-hidden />
+        <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/20 blur-3xl" aria-hidden />
+        <div className="relative flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-[11px] font-medium uppercase tracking-wider text-primary">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                {planLabel} plan
+              </span>
+              {org?.stage && (
+                <span className="rounded-full border border-border bg-background/60 px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
+                  Stage · {org.stage}
+                </span>
+              )}
+            </div>
+            <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight md:text-4xl">
+              {greetingFor()}, <span className="text-gradient">{firstName}</span>
+            </h2>
+            <p className="mt-1.5 text-sm text-muted-foreground">
+              {org?.name ? `${org.name} · ` : ""}Your AI operating system at a glance.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Link to="/app/launchpad">
+              <Button className="gap-2 bg-gradient-primary text-primary-foreground hover:opacity-90">
+                <Sparkles className="h-4 w-4" /> Run a Tool
+              </Button>
             </Link>
-          ))}
-        </div>
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-3">
-        <div className="rounded-xl border border-border bg-card p-5">
-          <div className="flex items-center gap-2"><Rocket className="h-4 w-4 text-launchpad" /><div className="text-sm font-semibold">Generations used</div></div>
-          <div className="mt-3 flex items-end gap-2">
-            <div className="text-3xl font-semibold">{totalUsed}</div>
-            <div className="pb-1 text-xs text-muted-foreground">/ {limit ?? "∞"} this month</div>
+            <Link to="/app/leads">
+              <Button variant="outline" className="gap-2"><Plus className="h-4 w-4" /> Add Lead</Button>
+            </Link>
+            <Link to="/app/assets">
+              <Button variant="ghost" className="gap-2"><FolderOpen className="h-4 w-4" /> View Assets</Button>
+            </Link>
           </div>
-          <Link to="/app/launchpad" className="mt-3 inline-flex text-xs text-muted-foreground hover:text-foreground">Open Launchpad →</Link>
         </div>
-        <div className="rounded-xl border border-border bg-card p-5">
-          <div className="flex items-center gap-2"><Cpu className="h-4 w-4 text-nova" /><div className="text-sm font-semibold">Plan</div></div>
-          <div className="mt-3 text-3xl font-semibold capitalize">{sub?.plan ?? "starter"}</div>
-          <Link to="/app/billing" className="mt-3 inline-flex text-xs text-muted-foreground hover:text-foreground">Manage billing →</Link>
-        </div>
-        <div className="rounded-xl border border-border bg-card p-5">
-          <div className="flex items-center gap-2"><BarChart3 className="h-4 w-4 text-nova" /><div className="text-sm font-semibold">Recent runs</div></div>
-          <div className="mt-3 text-3xl font-semibold">{runs.length}</div>
-          <Link to="/app/launchpad/history" className="mt-3 inline-flex text-xs text-muted-foreground hover:text-foreground">View history →</Link>
-        </div>
-      </div>
+      </section>
 
-      <div className="rounded-xl border border-border bg-card p-5">
-        <SectionTitle>Recent activity</SectionTitle>
-        {runs.length === 0 ? (
-          <div className="py-6 text-center text-sm text-muted-foreground">No runs yet. <Link to="/app/launchpad" className="underline">Generate your first output</Link>.</div>
-        ) : (
-          <div className="divide-y divide-border">
-            {runs.map((r) => (
-              <div key={r.id} className="flex items-center justify-between py-2.5 text-sm">
-                <div className="min-w-0">
-                  <div className="truncate font-medium">{r.tool_key}</div>
-                  <div className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleString()} · {r.status}</div>
-                </div>
-                <span className={cn("rounded-full px-2 py-0.5 text-[11px]", r.status === "succeeded" ? "bg-success/15 text-success" : r.status === "failed" ? "bg-destructive/10 text-destructive" : "bg-muted")}>{r.status}</span>
+      {/* ── KPI Row ── */}
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {kpis.map((k) => (
+          <div key={k.label} className="group relative overflow-hidden rounded-2xl border border-border bg-card p-5 transition hover:border-primary/40 hover:shadow-elevated">
+            <div className={cn("absolute -right-8 -top-8 h-24 w-24 rounded-full bg-gradient-to-br opacity-20 blur-2xl transition group-hover:opacity-40", k.accent)} aria-hidden />
+            <div className="relative flex items-start justify-between">
+              <div>
+                <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{k.label}</div>
+                <div className="mt-2 font-display text-3xl font-semibold tracking-tight">{k.value}</div>
+                <div className="mt-1 text-xs text-muted-foreground">{k.sub}</div>
               </div>
-            ))}
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <k.icon className="h-4.5 w-4.5" />
+              </div>
+            </div>
           </div>
-        )}
-      </div>
+        ))}
+      </section>
+
+      {/* ── Usage + Activity ── */}
+      <section className="grid gap-4 lg:grid-cols-3">
+        {/* Usage */}
+        <div className="rounded-2xl border border-border bg-card p-5 lg:col-span-1">
+          <div className="flex items-center justify-between">
+            <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Monthly Usage</div>
+            <Link to="/app/billing" className="text-[11px] text-muted-foreground hover:text-foreground">Manage →</Link>
+          </div>
+          <div className="mt-4 flex items-end gap-2">
+            <span className="font-display text-3xl font-semibold">{totalUsed}</span>
+            <span className="pb-1 text-sm text-muted-foreground">/ {limit ?? "∞"}</span>
+          </div>
+          <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-primary to-primary-glow transition-all"
+              style={{ width: `${limit ? usagePct : 8}%` }}
+            />
+          </div>
+          <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
+            <span>{limit ? `${usagePct}% of plan` : "Unlimited"}</span>
+            <span className="capitalize">{planLabel}</span>
+          </div>
+          {limit && usagePct >= 80 && (
+            <Link to="/app/billing" className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline">
+              Upgrade plan <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          )}
+        </div>
+
+        {/* Recent activity */}
+        <div className="rounded-2xl border border-border bg-card p-5 lg:col-span-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Activity className="h-4 w-4 text-muted-foreground" />
+              <div className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Recent activity</div>
+            </div>
+            <Link to="/app/launchpad/history" className="text-[11px] text-muted-foreground hover:text-foreground">View all →</Link>
+          </div>
+
+          {recentRuns.length === 0 ? (
+            <div className="mt-6 rounded-xl border border-dashed border-border bg-background/50 p-8 text-center">
+              <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <Sparkles className="h-5 w-5" />
+              </div>
+              <div className="mt-3 text-sm font-medium">No activity yet</div>
+              <div className="mt-1 text-xs text-muted-foreground">Run your first AI tool to see activity here.</div>
+              <Link to="/app/launchpad"><Button size="sm" className="mt-4 gap-2"><Rocket className="h-3.5 w-3.5" /> Open Launchpad</Button></Link>
+            </div>
+          ) : (
+            <ul className="mt-4 divide-y divide-border">
+              {recentRuns.map((r) => {
+                const Icon = r.status === "succeeded" ? CheckCircle2 : r.status === "failed" ? XCircle : Loader2;
+                const tone = r.status === "succeeded" ? "text-success" : r.status === "failed" ? "text-destructive" : "text-muted-foreground";
+                return (
+                  <li key={r.id} className="flex items-center justify-between gap-3 py-3">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <span className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted", tone)}>
+                        <Icon className={cn("h-4 w-4", r.status === "running" && "animate-spin")} />
+                      </span>
+                      <div className="min-w-0">
+                        <div className="truncate text-sm font-medium capitalize">{r.tool_key.replace(/-/g, " ")}</div>
+                        <div className="text-[11px] text-muted-foreground">{new Date(r.created_at).toLocaleString()}</div>
+                      </div>
+                    </div>
+                    <span className={cn(
+                      "rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider",
+                      r.status === "succeeded" && "bg-success/15 text-success",
+                      r.status === "failed" && "bg-destructive/15 text-destructive",
+                      r.status === "running" && "bg-muted text-muted-foreground",
+                    )}>{r.status}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+      </section>
     </div>
   );
-}
-
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return <div className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">{children}</div>;
 }
