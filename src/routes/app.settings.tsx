@@ -5,7 +5,6 @@ import { MissionHeader, StatusBadge, XpBar } from "@/components/app/MissionHeade
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/lib/auth";
 import { organizationQuery, subscriptionQuery, planEntitlementsQuery, integrationsQuery, usageQuery } from "@/lib/queries";
 import { supabase } from "@/integrations/supabase/client";

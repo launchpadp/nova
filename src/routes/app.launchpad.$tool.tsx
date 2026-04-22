@@ -76,14 +76,14 @@ function ToolPage() {
 
   const saveToAssets = async () => {
     if (!currentOrgId || !user || !output) return;
-    const { error } = await supabase.from("generated_assets").insert({
+    const { error } = await supabase.from("generated_assets").insert([{
       organization_id: currentOrgId,
       user_id: user.id,
       category: tool.toolKey,
       kind: tool.key,
       title: title || tool.name,
-      content: output,
-    });
+      content: output as never,
+    }]);
     if (error) toast.error(error.message);
     else { toast.success("Saved to vault"); qc.invalidateQueries({ queryKey: ["generated_assets", currentOrgId] }); }
   };
