@@ -69,8 +69,8 @@ function LandingPage() {
         </span>
 
         <h1 className="mt-6 font-display text-4xl font-semibold tracking-tight md:text-[3.25rem] md:leading-[1.05]">
-          Run your entire business{" "}
-          <span className="text-gradient">from one workspace.</span>
+          Stop juggling 10 tools.{" "}
+          <span className="text-gradient">Run your entire business from one OS.</span>
         </h1>
         <p className="mt-5 max-w-xl text-base text-muted-foreground md:text-[17px]">
           Nova OPS combines AI tools, automations, and a lightweight CRM so founders
@@ -92,13 +92,13 @@ function LandingPage() {
           No credit card · Instant access · Cancel anytime
         </div>
 
-        {/* preview tiles */}
+        {/* outcome stats */}
         <div className="mt-16 grid w-full max-w-4xl gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {[
-            { icon: Rocket, label: "Launchpad", desc: "10 AI tools" },
-            { icon: Cpu, label: "Nova OS", desc: "6 automations" },
-            { icon: Inbox, label: "Leads", desc: "Pipeline tracker" },
-            { icon: FolderOpen, label: "Assets", desc: "Generated outputs" },
+            { icon: Rocket, label: "$14k", desc: "Avg revenue recovered in month one" },
+            { icon: Cpu, label: "6 hrs", desc: "Saved per week on follow-up" },
+            { icon: Inbox, label: "90 sec", desc: "To respond to every lead" },
+            { icon: FolderOpen, label: "14 days", desc: "To live — guaranteed" },
           ].map((t) => (
             <div
               key={t.label}

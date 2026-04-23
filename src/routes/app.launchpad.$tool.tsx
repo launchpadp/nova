@@ -13,12 +13,13 @@ import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
 import { blockIfGuest } from "@/lib/guest";
-import { toolRunsQuery } from "@/lib/queries";
+import { toolRunsQuery, subscriptionQuery } from "@/lib/queries";
 import { cn } from "@/lib/utils";
 import { OutputBody, OutputHeader, copyText } from "@/components/app/OutputRenderer";
 import { EmptyState } from "@/components/app/EmptyState";
 import { HANDOFFS } from "@/lib/handoffs";
 import { loadDraft, clearDraft, useDraftAutosave, formatSavedAgo } from "@/lib/draftStore";
+import { PaywallModal } from "@/components/app/PaywallModal";
 
 type Search = { context?: string; title?: string };
 
@@ -55,6 +56,10 @@ function ToolPage() {
   const [title, setTitle] = useState("");
   const [context, setContext] = useState("");
   const [draftRestored, setDraftRestored] = useState(false);
+  const [paywallOpen, setPaywallOpen] = useState(false);
+
+  const subQ = useQuery({ ...subscriptionQuery(currentOrgId ?? ""), enabled: !!currentOrgId });
+  const planTier = subQ.data?.plan ?? "starter";
 
   // Restore draft / handoff prefill — runs once per tool change
   useEffect(() => {
@@ -96,10 +101,20 @@ function ToolPage() {
 
   const handoffs = HANDOFFS[tool.key] ?? [];
 
+  // Hard paywall: Starter tier can only run Idea Validator 3 times
+  const ideaValidatorRuns = useMemo(
+    () => (runsQ.data ?? []).filter((r) => r.tool_key === "validate-idea" && r.status === "succeeded").length,
+    [runsQ.data],
+  );
+  const isFreeStarter = planTier === "starter";
+  const isIdeaValidator = tool.toolKey === "validate-idea";
+  const ideaValidatorBlocked = isFreeStarter && isIdeaValidator && ideaValidatorRuns >= 3;
+
   const handleGenerate = async () => {
     if (blockIfGuest("Sign up to run AI tools and unlock real outputs.")) return;
     if (!tool.wired) { toast.error("This tool is launching soon."); return; }
     if (!context.trim()) { toast.error("Add some context first."); return; }
+    if (ideaValidatorBlocked) { setPaywallOpen(true); return; }
     setGenerating(true);
     setOutput(null);
     setRunId(null);
@@ -176,6 +191,7 @@ function ToolPage() {
 
   return (
     <div className="space-y-6">
+      <PaywallModal open={paywallOpen} onOpenChange={setPaywallOpen} />
       {/* Header */}
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-2 text-[12px] text-muted-foreground">
@@ -262,10 +278,17 @@ function ToolPage() {
               >
                 {generating ? (
                   <><Loader2 className="h-4 w-4 animate-spin" /> Generating with AI…</>
+                ) : ideaValidatorBlocked ? (
+                  <><Lock className="h-4 w-4" /> Upgrade to continue</>
                 ) : (
                   <><Sparkles className="h-4 w-4" /> Generate with AI</>
                 )}
               </Button>
+              {isFreeStarter && isIdeaValidator && (
+                <p className="text-center text-[11.5px] text-muted-foreground">
+                  Free plan · {Math.min(ideaValidatorRuns, 3)} of 3 free validations used
+                </p>
+              )}
               {!tool.wired && (
                 <p className="text-center text-[11.5px] text-muted-foreground">
                   This tool is launching soon. Inputs save as drafts.
