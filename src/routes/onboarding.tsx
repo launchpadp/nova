@@ -1,8 +1,8 @@
 import { createFileRoute, useNavigate, redirect } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ArrowRight, ArrowLeft, Check, Lightbulb, Search, Rocket, Settings as SettingsIcon, TrendingUp,
-  Target, Workflow, Sparkles,
+  Target, Workflow, Sparkles, Brain, Compass, LayoutDashboard, Zap,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
