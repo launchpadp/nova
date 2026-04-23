@@ -71,6 +71,7 @@ export function AppSidebar() {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const { currentOrg, currentOrgId, profile, user } = useAuth();
   const { isGuest, disable } = useGuest();
+  const { isAdmin } = useIsAdmin();
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
@@ -80,6 +81,11 @@ export function AppSidebar() {
 
   const subQ = useQuery({ ...subscriptionQuery(currentOrgId ?? ""), enabled: !!currentOrgId });
   const plan = subQ.data?.plan ?? "starter";
+
+  const footerNav: NavItem[] = [
+    ...(isAdmin ? [{ to: "/app/admin", label: "Admin", icon: Shield } as NavItem] : []),
+    ...FOOTER_NAV,
+  ];
 
   const exitDemo = () => {
     disable();
