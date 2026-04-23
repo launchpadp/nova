@@ -118,6 +118,7 @@ export const GUEST_SUBSCRIPTION = {
   plan: GUEST_USER.plan,
   status: "active",
   current_period_end: new Date(now + 25*day).toISOString(),
+  cancel_at_period_end: false,
   stripe_customer_id: null,
   stripe_subscription_id: null,
   created_at: new Date(now - 30*day).toISOString(),
