@@ -463,7 +463,8 @@ export type Database = {
           status: string
           updated_at: string
           user_id: string
-          value: string | null
+          value_encrypted: string | null
+          value_last4: string | null
         }
         Insert: {
           created_at?: string
@@ -472,7 +473,8 @@ export type Database = {
           status?: string
           updated_at?: string
           user_id: string
-          value?: string | null
+          value_encrypted?: string | null
+          value_last4?: string | null
         }
         Update: {
           created_at?: string
@@ -481,7 +483,8 @@ export type Database = {
           status?: string
           updated_at?: string
           user_id?: string
-          value?: string | null
+          value_encrypted?: string | null
+          value_last4?: string | null
         }
         Relationships: []
       }
@@ -558,9 +561,49 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      user_integrations_masked: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          integration_key: string | null
+          is_connected: boolean | null
+          status: string | null
+          updated_at: string | null
+          user_id: string | null
+          value_last4: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string | null
+          integration_key?: string | null
+          is_connected?: never
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          value_last4?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string | null
+          integration_key?: string | null
+          is_connected?: never
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          value_last4?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      get_user_integration_secret: {
+        Args: {
+          _encryption_key: string
+          _integration_key: string
+          _user_id: string
+        }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -575,6 +618,20 @@ export type Database = {
       is_org_owner: {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
+      }
+      set_user_integration: {
+        Args: {
+          _encryption_key: string
+          _integration_key: string
+          _user_id: string
+          _value: string
+        }
+        Returns: {
+          integration_key: string
+          is_connected: boolean
+          status: string
+          value_last4: string
+        }[]
       }
     }
     Enums: {
