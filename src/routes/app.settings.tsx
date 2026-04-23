@@ -321,7 +321,13 @@ function ConnectorCard({
       </div>
       <div className="mt-3 flex gap-2">
         <Input
-          placeholder={conn.soon ? "Coming soon" : conn.hint}
+          placeholder={
+            conn.soon
+              ? "Coming soon"
+              : isConnected && existing?.value_last4
+                ? `Connected · ending …${existing.value_last4} (re-enter to update)`
+                : conn.hint
+          }
           value={val}
           disabled={conn.soon}
           onChange={(e) => setVal(e.target.value)}
