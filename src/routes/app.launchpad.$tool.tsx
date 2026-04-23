@@ -191,6 +191,7 @@ function ToolPage() {
 
   return (
     <div className="space-y-6">
+      <PaywallModal open={paywallOpen} onOpenChange={setPaywallOpen} />
       {/* Header */}
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-2 text-[12px] text-muted-foreground">
@@ -277,10 +278,17 @@ function ToolPage() {
               >
                 {generating ? (
                   <><Loader2 className="h-4 w-4 animate-spin" /> Generating with AI…</>
+                ) : ideaValidatorBlocked ? (
+                  <><Lock className="h-4 w-4" /> Upgrade to continue</>
                 ) : (
                   <><Sparkles className="h-4 w-4" /> Generate with AI</>
                 )}
               </Button>
+              {isFreeStarter && isIdeaValidator && (
+                <p className="text-center text-[11.5px] text-muted-foreground">
+                  Free plan · {Math.min(ideaValidatorRuns, 3)} of 3 free validations used
+                </p>
+              )}
               {!tool.wired && (
                 <p className="text-center text-[11.5px] text-muted-foreground">
                   This tool is launching soon. Inputs save as drafts.
