@@ -109,10 +109,15 @@ function ToolPage() {
   const isFreeStarter = planTier === "starter";
   const isIdeaValidator = tool.toolKey === "validate-idea";
   const ideaValidatorBlocked = isFreeStarter && isIdeaValidator && ideaValidatorRuns >= 3;
+  const isPastDue = subQ.data?.status === "past_due";
 
   const handleGenerate = async () => {
     if (blockIfGuest("Sign up to run AI tools and unlock real outputs.")) return;
     if (!tool.wired) { toast.error("This tool is launching soon."); return; }
+    if (isPastDue) {
+      toast.error("Payment failed — update your card in Billing to keep using AI tools.");
+      return;
+    }
     if (!context.trim()) { toast.error("Add some context first."); return; }
     if (ideaValidatorBlocked) { setPaywallOpen(true); return; }
     setGenerating(true);

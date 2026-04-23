@@ -37,6 +37,12 @@ serve(async (req) => {
       case "customer.subscription.deleted":
         await cancelSubscription(event.data.object);
         break;
+      case "invoice.payment_failed":
+        await markPastDue(event.data.object);
+        break;
+      case "invoice.payment_succeeded":
+        await clearPastDue(event.data.object);
+        break;
       default:
         console.log("Unhandled:", event.type);
     }
@@ -51,19 +57,22 @@ serve(async (req) => {
 });
 
 async function syncSubscription(obj: any) {
-  // Could be a checkout.session OR subscription object
-  let subscriptionId: string | undefined = obj.subscription || obj.id;
-  let customerId: string | undefined = obj.customer;
-  let status: string = obj.status || "active";
-  let currentPeriodEnd: number | null = obj.current_period_end ?? null;
-  let metadata = obj.metadata || {};
+  const subscriptionId: string | undefined = obj.subscription || obj.id;
+  const customerId: string | undefined = obj.customer;
+  const status: string = obj.status || "active";
+  const currentPeriodEnd: number | null = obj.current_period_end ?? null;
+  const cancelAtPeriodEnd: boolean = obj.cancel_at_period_end ?? false;
+  const metadata = obj.metadata || {};
   let lookupKey: string | undefined = metadata.priceLookupKey;
-  let organizationId: string | undefined = metadata.organizationId;
+  const organizationId: string | undefined = metadata.organizationId;
 
-  // If this is a subscription object, dig into items
   const item = obj.items?.data?.[0];
   if (item?.price) {
-    lookupKey = lookupKey || item.price.lookup_key || item.price.metadata?.lovable_external_id;
+    lookupKey =
+      lookupKey ||
+      item.price.lookup_key ||
+      item.price.metadata?.lovable_external_id ||
+      item.price.metadata?.priceLookupKey;
   }
 
   if (!organizationId) {
@@ -71,24 +80,33 @@ async function syncSubscription(obj: any) {
     return;
   }
 
-  const plan = lookupKeyToPlan(lookupKey) ?? "launch";
+  const plan = lookupKeyToPlan(lookupKey);
+  if (!plan) {
+    console.warn("Could not infer plan from lookupKey, leaving plan unchanged", {
+      lookupKey,
+      organizationId,
+    });
+  }
+
+  const update: Record<string, unknown> = {
+    status,
+    stripe_subscription_id: subscriptionId ?? null,
+    stripe_customer_id: customerId ?? null,
+    current_period_end: currentPeriodEnd
+      ? new Date(currentPeriodEnd * 1000).toISOString()
+      : null,
+    cancel_at_period_end: cancelAtPeriodEnd,
+    updated_at: new Date().toISOString(),
+  };
+  if (plan) update.plan = plan;
 
   const { error } = await supabase
     .from("subscriptions")
-    .update({
-      plan,
-      status,
-      stripe_subscription_id: subscriptionId ?? null,
-      stripe_customer_id: customerId ?? null,
-      current_period_end: currentPeriodEnd
-        ? new Date(currentPeriodEnd * 1000).toISOString()
-        : null,
-      updated_at: new Date().toISOString(),
-    })
+    .update(update)
     .eq("organization_id", organizationId);
 
   if (error) console.error("subscriptions update failed", error);
-  else console.log("Synced plan", plan, "for org", organizationId);
+  else console.log("Synced", { plan, organizationId, status });
 }
 
 async function cancelSubscription(obj: any) {
@@ -96,6 +114,31 @@ async function cancelSubscription(obj: any) {
   if (!organizationId) return;
   await supabase
     .from("subscriptions")
-    .update({ plan: "starter", status: "canceled", updated_at: new Date().toISOString() })
+    .update({
+      plan: "starter",
+      status: "canceled",
+      cancel_at_period_end: false,
+      updated_at: new Date().toISOString(),
+    })
     .eq("organization_id", organizationId);
+}
+
+async function markPastDue(invoice: any) {
+  const customerId = invoice.customer;
+  if (!customerId) return;
+  await supabase
+    .from("subscriptions")
+    .update({ status: "past_due", updated_at: new Date().toISOString() })
+    .eq("stripe_customer_id", customerId);
+}
+
+async function clearPastDue(invoice: any) {
+  const customerId = invoice.customer;
+  if (!customerId) return;
+  // Only flip back to active if currently past_due
+  await supabase
+    .from("subscriptions")
+    .update({ status: "active", updated_at: new Date().toISOString() })
+    .eq("stripe_customer_id", customerId)
+    .eq("status", "past_due");
 }
