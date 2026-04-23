@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate, redirect } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import {
   ArrowRight, ArrowLeft, Check, Lightbulb, Search, Rocket, Settings as SettingsIcon, TrendingUp,
-  Target, Workflow, Sparkles, Brain, Compass, LayoutDashboard, Zap,
+  Workflow, Sparkles,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -268,5 +268,102 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <div className="mb-1.5 text-[11.5px] font-medium text-muted-foreground">{label}</div>
       {children}
     </label>
+  );
+}
+
+const BUILD_STEPS = [
+  "Analyzing your business",
+  "Researching your industry",
+  "Mapping your goals",
+  "Building your command center",
+  "Preparing your next actions",
+];
+
+function BuildingDashboard({ onDone }: { onDone: () => void }) {
+  const [active, setActive] = useState(0);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const total = BUILD_STEPS.length;
+    const stepMs = 850;
+    const tickMs = 25;
+    const totalMs = stepMs * total;
+    const start = Date.now();
+    const id = setInterval(() => {
+      const elapsed = Date.now() - start;
+      const pct = Math.min(100, (elapsed / totalMs) * 100);
+      setProgress(pct);
+      const idx = Math.min(total - 1, Math.floor(elapsed / stepMs));
+      setActive(idx);
+      if (elapsed >= totalMs) {
+        clearInterval(id);
+        setTimeout(onDone, 450);
+      }
+    }, tickMs);
+    return () => clearInterval(id);
+  }, [onDone]);
+
+  return (
+    <div className="boot-grid relative flex min-h-screen flex-col items-center justify-center overflow-hidden p-6">
+      <div className="w-full max-w-lg">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-primary text-white shadow-card glow-primary">
+            <Sparkles className="h-4 w-4" />
+          </div>
+          <div>
+            <div className="text-[10.5px] font-medium uppercase tracking-[0.18em] text-primary">System boot</div>
+            <div className="font-display text-[15px] font-semibold tracking-tight">Building your command center</div>
+          </div>
+        </div>
+
+        <div className="mt-6 rounded-lg border border-border bg-surface/85 backdrop-blur p-5 shadow-card">
+          <ul className="space-y-2.5 font-mono text-[12px]">
+            {BUILD_STEPS.map((label, i) => {
+              const done = i < active;
+              const live = i === active;
+              return (
+                <li key={label} className="flex items-center gap-2.5">
+                  <span className={cn(
+                    "flex h-4 w-4 shrink-0 items-center justify-center rounded-sm border text-[9px]",
+                    done && "border-success bg-success/15 text-success",
+                    live && "border-primary bg-primary/15 text-primary",
+                    !done && !live && "border-border bg-surface-2 text-muted-foreground/60",
+                  )}>
+                    {done ? <Check className="h-2.5 w-2.5" /> : live ? <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" /> : null}
+                  </span>
+                  <span className={cn(
+                    "tabular-nums",
+                    done && "text-muted-foreground",
+                    live && "text-foreground",
+                    !done && !live && "text-muted-foreground/50",
+                  )}>
+                    [{String(i + 1).padStart(2, "0")}] {label}
+                    {live && <span className="text-primary animate-pulse">…</span>}
+                    {done && <span className="text-success"> ok</span>}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+
+          <div className="mt-5">
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-2">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-primary via-accent to-primary transition-[width] duration-100 ease-out"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            <div className="mt-2 flex items-center justify-between text-[10.5px] font-mono text-muted-foreground">
+              <span>nova_os://provisioning</span>
+              <span className="tabular-nums">{Math.round(progress)}%</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 text-center text-[11px] text-muted-foreground">
+          Personalizing your dashboard from your onboarding answers…
+        </div>
+      </div>
+    </div>
   );
 }
