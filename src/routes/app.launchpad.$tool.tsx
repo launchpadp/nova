@@ -101,10 +101,20 @@ function ToolPage() {
 
   const handoffs = HANDOFFS[tool.key] ?? [];
 
+  // Hard paywall: Starter tier can only run Idea Validator 3 times
+  const ideaValidatorRuns = useMemo(
+    () => (runsQ.data ?? []).filter((r) => r.tool_key === "validate-idea" && r.status === "succeeded").length,
+    [runsQ.data],
+  );
+  const isFreeStarter = planTier === "starter";
+  const isIdeaValidator = tool.toolKey === "validate-idea";
+  const ideaValidatorBlocked = isFreeStarter && isIdeaValidator && ideaValidatorRuns >= 3;
+
   const handleGenerate = async () => {
     if (blockIfGuest("Sign up to run AI tools and unlock real outputs.")) return;
     if (!tool.wired) { toast.error("This tool is launching soon."); return; }
     if (!context.trim()) { toast.error("Add some context first."); return; }
+    if (ideaValidatorBlocked) { setPaywallOpen(true); return; }
     setGenerating(true);
     setOutput(null);
     setRunId(null);
