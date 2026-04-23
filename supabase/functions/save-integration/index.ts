@@ -8,15 +8,15 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const ALLOWED_KEYS = new Set([
+const ALLOWED_FLAT = new Set([
   "stripe", "gohighlevel", "airtable", "n8n", "zapier", "slack",
   "google_calendar", "gmail",
-  // nova module prefixed keys
-  "nova:lead-capture", "nova:appointment", "nova:followup", "nova:invoice",
-  "nova:reporting", "nova:onboarding", "nova:reactivation", "nova:reviews",
 ]);
-
-const KEY_PREFIX_RE = /^(?:nova:)?[a-z][a-z0-9_-]{1,50}$/i;
+// Nova module webhooks use the "nova:webhook:<module>" prefix.
+const NOVA_WEBHOOK_RE = /^nova:webhook:[a-z0-9_-]{1,64}$/;
+function isAllowedKey(k: string) {
+  return ALLOWED_FLAT.has(k) || NOVA_WEBHOOK_RE.test(k);
+}
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -56,8 +56,7 @@ serve(async (req) => {
     const integrationKey = String(body.integration_key || "").trim();
     const value = body.value == null ? "" : String(body.value);
 
-    if (!KEY_PREFIX_RE.test(integrationKey) ||
-        !(ALLOWED_KEYS.has(integrationKey) || integrationKey.startsWith("nova:"))) {
+    if (!isAllowedKey(integrationKey)) {
       return json({ error: "Unknown integration_key" }, 400);
     }
     if (value.length > 4096) return json({ error: "Value too long" }, 400);
