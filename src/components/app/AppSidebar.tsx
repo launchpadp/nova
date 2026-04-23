@@ -128,7 +128,7 @@ export function AppSidebar() {
     >
       {/* Brand */}
       <div className={cn("flex h-14 items-center gap-2.5 border-b border-sidebar-border px-3", collapsed && "justify-center px-0")}>
-        <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-gradient-primary text-white font-display font-bold text-[13px] tracking-tight glow-primary">
+        <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary via-accent to-[var(--orange)] text-white font-display font-bold text-[13px] tracking-tight shadow-card">
           LN
         </div>
         {!collapsed && (
@@ -248,9 +248,12 @@ function NavRow({
         {/* Active rail */}
         {active && (
           <span
+            key={item.to}
             className={cn(
-              "absolute left-0 top-1.5 bottom-1.5 w-[2px] rounded-r",
-              item.workspace === "nova" ? "bg-accent" : "bg-primary",
+              "rail-in absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-r-full",
+              item.workspace === "nova"
+                ? "bg-gradient-to-b from-accent to-[var(--orange)]"
+                : "bg-gradient-to-b from-primary to-accent",
             )}
           />
         )}
