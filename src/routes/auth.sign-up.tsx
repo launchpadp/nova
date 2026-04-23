@@ -32,7 +32,7 @@ function SignUp() {
     <AuthShell title="Create your account" subtitle="Free forever. No credit card required.">
       <form className="space-y-4" onSubmit={onSubmit}>
         <Field label="Full name"><Input value={fullName} placeholder="Alex Founder" onChange={(e) => setFullName(e.target.value)} required className="h-11 bg-surface-2" /></Field>
-        <Field label="Work email"><Input type="email" placeholder="you@company.com" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-11 bg-surface-2" /></Field>
+        <Field label="Email"><Input type="email" placeholder="you@company.com" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-11 bg-surface-2" /></Field>
         <Field label="Password"><Input type="password" placeholder="At least 8 characters" value={password} onChange={(e) => setPassword(e.target.value)} minLength={8} required className="h-11 bg-surface-2" /></Field>
         <Button className="w-full h-11 mt-2" type="submit" disabled={loading}>
           {loading ? "Creating…" : "Get started free"}
