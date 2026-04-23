@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { PageHeader } from "@/components/app/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -9,8 +10,18 @@ import { planEntitlementsQuery, subscriptionQuery, usageQuery } from "@/lib/quer
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { blockIfGuest } from "@/lib/guest";
+import { CheckoutDialog } from "@/components/app/CheckoutDialog";
+import { PaymentTestModeBanner } from "@/components/app/PaymentTestModeBanner";
+import { isPaymentsEnabled } from "@/lib/stripe";
 
 export const Route = createFileRoute("/app/billing")({ component: Billing });
+
+const PLAN_PRICE_LOOKUP: Record<string, string | null> = {
+  starter: null,
+  launch: "launch_monthly",
+  operate: "operate_monthly",
+  scale: "scale_monthly",
+};
 
 const PLAN_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   starter: Sparkles,
@@ -27,11 +38,13 @@ const PLAN_TAGLINE: Record<string, string> = {
 };
 
 function Billing() {
-  const { currentOrgId } = useAuth();
+  const { currentOrgId, user } = useAuth();
   const qc = useQueryClient();
   const subQ = useQuery({ ...subscriptionQuery(currentOrgId ?? ""), enabled: !!currentOrgId });
   const plansQ = useQuery(planEntitlementsQuery());
   const usageQ = useQuery({ ...usageQuery(currentOrgId ?? ""), enabled: !!currentOrgId });
+
+  const [checkoutPriceId, setCheckoutPriceId] = useState<string | null>(null);
 
   const currentPlan = subQ.data?.plan ?? "starter";
   const usage = usageQ.data ?? [];
@@ -40,10 +53,20 @@ function Billing() {
   const limit = currentEnt?.monthly_generation_limit ?? null;
   const pct = limit ? Math.min(100, (totalUsed / limit) * 100) : 0;
   const allowedToolCount = currentEnt?.allowed_tools.length ?? 0;
+  const paymentsOn = isPaymentsEnabled();
 
   const changePlan = async (plan: string) => {
     if (blockIfGuest("Sign up to manage your subscription.")) return;
     if (!currentOrgId) return;
+
+    const lookup = PLAN_PRICE_LOOKUP[plan];
+    // Paid plan + payments configured → open Stripe checkout
+    if (lookup && paymentsOn) {
+      setCheckoutPriceId(lookup);
+      return;
+    }
+
+    // Downgrade to starter or payments not wired → direct DB switch
     const { error } = await supabase
       .from("subscriptions")
       .update({ plan: plan as "starter" | "launch" | "operate" | "scale" })
@@ -62,6 +85,7 @@ function Billing() {
 
   return (
     <div className="space-y-6">
+      <PaymentTestModeBanner />
       <PageHeader
         eyebrow="Account"
         title="Billing & usage"
