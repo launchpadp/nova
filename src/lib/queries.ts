@@ -134,14 +134,45 @@ export const leadsQuery = (orgId: string) =>
     },
   });
 
+export type MaskedIntegration = {
+  id: string;
+  user_id: string;
+  integration_key: string;
+  status: string;
+  value_last4: string | null;
+  is_connected: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
 export const integrationsQuery = (userId: string) =>
   queryOptions({
     queryKey: ["user_integrations", userId],
-    queryFn: async () => {
-      if (isGuest()) return GUEST_INTEGRATIONS;
+    queryFn: async (): Promise<MaskedIntegration[]> => {
+      if (isGuest()) return GUEST_INTEGRATIONS as MaskedIntegration[];
       const { data, error } = await supabase
-        .from("user_integrations").select("*").eq("user_id", userId);
+        .from("user_integrations_masked")
+        .select("*")
+        .eq("user_id", userId);
       if (error) throw error;
-      return data ?? [];
+      return (data ?? []) as MaskedIntegration[];
     },
   });
+
+export async function saveIntegration(integrationKey: string, value: string) {
+  const { data, error } = await supabase.functions.invoke("save-integration", {
+    body: { integration_key: integrationKey, value },
+  });
+  if (error) throw error;
+  return data;
+}
+
+export async function disconnectIntegration(userId: string, integrationKey: string) {
+  // RLS allows users to delete their own row directly
+  const { error } = await supabase
+    .from("user_integrations")
+    .delete()
+    .eq("user_id", userId)
+    .eq("integration_key", integrationKey);
+  if (error) throw error;
+}

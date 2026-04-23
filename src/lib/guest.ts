@@ -130,4 +130,4 @@ export const GUEST_USAGE = [
   { id: "gu2", organization_id: GUEST_ORG_ID, tool_key: "generate-pitch", count: 3, period, last_used_at: new Date().toISOString() },
 ];
 
-export const GUEST_INTEGRATIONS: { id: string; user_id: string; integration_key: string; value: string | null; status: string; created_at: string; updated_at: string }[] = [];
+export const GUEST_INTEGRATIONS: { id: string; user_id: string; integration_key: string; value_last4: string | null; is_connected: boolean; status: string; created_at: string; updated_at: string }[] = [];
