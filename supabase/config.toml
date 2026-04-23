@@ -29,3 +29,9 @@ verify_jwt = false
 
 [functions.payments-webhook]
 verify_jwt = false
+
+[functions.manage-subscription]
+verify_jwt = false
+
+[functions.list-invoices]
+verify_jwt = false
