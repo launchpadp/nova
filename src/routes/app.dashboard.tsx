@@ -10,9 +10,10 @@ import {
   Sparkles, Rocket, Inbox, ArrowRight, Activity, CheckCircle2, XCircle,
   Loader2, Zap, Target, Lightbulb, Megaphone, Settings2, Globe, Mail, Cpu,
   TrendingUp, Check, Clock, Plus, Skull, Trophy, UserPlus, FileText,
-  GitCompare, Workflow, ListChecks, UserCheck, LineChart, ArrowUpRight,
+  GitCompare, Workflow, ListChecks, UserCheck, LineChart, ArrowUpRight, LayoutDashboard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { WorkspaceHeader } from "@/components/app/WorkspaceHeader";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/app/dashboard")({ component: Dashboard });
@@ -154,26 +155,29 @@ function Dashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <section className="rise-in flex flex-col gap-3 md:flex-row md:items-end md:justify-between" style={{ ["--i" as string]: 0 }}>
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-2.5 py-0.5 text-[10.5px] font-medium text-foreground/80">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-              <span className="capitalize">{planLabel} plan</span>
-            </span>
-            <span className="rounded-full border border-border bg-surface px-2.5 py-0.5 text-[10.5px] font-medium text-muted-foreground">
-              Stage · {orgStage}
-            </span>
-          </div>
-          <h1 className="mt-3 font-display text-[1.75rem] font-semibold tracking-tight md:text-[2rem]">
-            {greetingFor()}, {firstName}
-          </h1>
-          <p className="mt-1 text-[13.5px] text-muted-foreground">
-            {org?.name ? `${org.name} · ` : ""}Your command center across the entire business journey.
-          </p>
-        </div>
-      </section>
+      {/* Mission control hero */}
+      <div className="rise-in" style={{ ["--i" as string]: 0 }}>
+        <WorkspaceHeader
+          variant="dashboard"
+          icon={LayoutDashboard}
+          eyebrow={`${planLabel} plan · stage ${orgStage}`}
+          title={`${greetingFor()}, ${firstName}`}
+          description={`${org?.name ? org.name + " · " : ""}Your command center across the entire business journey.`}
+          actions={
+            <div className="flex items-center gap-2">
+              <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-border bg-surface/80 backdrop-blur px-2.5 py-1 text-[10.5px] font-medium text-foreground/80">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+                <span className="capitalize">{planLabel}</span>
+              </span>
+              <Link to={nextAction.to}>
+                <Button size="sm" className="h-8 gap-1.5 bg-gradient-to-r from-primary to-accent hover:opacity-95 text-white shadow-card">
+                  {nextAction.cta} <ArrowRight className="h-3.5 w-3.5" />
+                </Button>
+              </Link>
+            </div>
+          }
+        />
+      </div>
 
       {/* Onboarding checklist — disappears once everything is done */}
       {!checklistComplete && (
@@ -345,31 +349,31 @@ function Dashboard() {
           )}
         </div>
 
-        {/* Next action */}
-        <div className="lg:col-span-4 rounded-lg border border-primary/30 bg-surface p-5 shadow-card relative overflow-hidden">
-          <div className="absolute -top-20 -right-20 h-40 w-40 rounded-full bg-primary/10 blur-3xl" />
+        {/* Next action — energy mesh */}
+        <div className="lg:col-span-4 relative overflow-hidden rounded-xl border border-accent/25 bg-surface p-5 shadow-card card-lift">
+          <div className="pointer-events-none absolute inset-0 opacity-90 bg-[radial-gradient(28rem_18rem_at_100%_0%,color-mix(in_oklab,var(--accent)_18%,transparent),transparent_60%),radial-gradient(20rem_14rem_at_0%_100%,color-mix(in_oklab,var(--orange)_14%,transparent),transparent_60%)]" />
           <div className="relative">
-            <div className="flex items-center gap-2 text-[10.5px] font-medium uppercase tracking-wider text-primary">
-              <Target className="h-3 w-3" /> Recommended Next Action
+            <div className="flex items-center gap-2 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-accent">
+              <Target className="h-3 w-3" /> Next Action
             </div>
-            <div className="mt-4 flex h-10 w-10 items-center justify-center rounded-md bg-primary/12 text-primary">
+            <div className="mt-4 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-accent to-[var(--orange)] text-white shadow-card">
               <nextAction.icon className="h-5 w-5" />
             </div>
-            <div className="mt-3 font-display text-[16px] font-semibold tracking-tight">{nextAction.title}</div>
+            <div className="mt-3 font-display text-[17px] font-semibold tracking-tight">{nextAction.title}</div>
             <p className="mt-1.5 text-[12.5px] text-muted-foreground leading-relaxed">{nextAction.desc}</p>
             <Link to={nextAction.to} className="mt-5 inline-flex">
-              <Button size="sm" className="h-9 gap-1.5">
+              <Button size="sm" className="h-9 gap-1.5 bg-foreground text-background hover:bg-foreground/90">
                 {nextAction.cta} <ArrowRight className="h-3.5 w-3.5" />
               </Button>
             </Link>
             {limit && (
-              <div className="mt-5 pt-4 border-t border-border">
+              <div className="mt-5 pt-4 border-t border-border/70">
                 <div className="flex items-center justify-between text-[11px] text-muted-foreground">
                   <span>AI generations</span>
                   <span className="tabular-nums">{totalUsed} / {limit}</span>
                 </div>
                 <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-surface-2">
-                  <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${Math.min(100, (totalUsed / limit) * 100)}%` }} />
+                  <div className="h-full rounded-full bg-gradient-to-r from-primary to-accent transition-all" style={{ width: `${Math.min(100, (totalUsed / limit) * 100)}%` }} />
                 </div>
               </div>
             )}
@@ -509,10 +513,10 @@ function StatCard({
   trend?: "up" | "down";
 }) {
   return (
-    <div className="rounded-lg border border-border bg-surface p-4 shadow-card transition hover:border-foreground/15">
+    <div className="rounded-xl border border-border bg-surface p-4 shadow-card card-lift">
       <div className="flex items-start justify-between">
         <div>
-          <div className="text-[10.5px] font-medium uppercase tracking-wider text-muted-foreground">{label}</div>
+          <div className="text-[10.5px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">{label}</div>
           <div className="mt-2 font-display text-[1.65rem] font-semibold leading-none tracking-tight tabular-nums">
             {value}
             {trend === "up" && <TrendingUp className="inline ml-1.5 h-4 w-4 text-success" />}
@@ -520,8 +524,10 @@ function StatCard({
           <div className="mt-2 text-[11px] text-muted-foreground">{sub}</div>
         </div>
         <div className={cn(
-          "flex h-8 w-8 items-center justify-center rounded-md",
-          accent === "primary" ? "bg-primary/15 text-primary" : "bg-accent/15 text-accent",
+          "flex h-9 w-9 items-center justify-center rounded-lg shadow-card text-white",
+          accent === "primary"
+            ? "bg-gradient-to-br from-primary to-accent"
+            : "bg-gradient-to-br from-accent to-[var(--orange)]",
         )}>
           <Icon className="h-4 w-4" />
         </div>
