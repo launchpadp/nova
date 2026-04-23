@@ -130,6 +130,18 @@ function Dashboard() {
   const qualifiedPipe = leads.filter((l) => ["Qualified", "Proposal"].includes(l.stage as string)).length;
 
   // Recommended next action — context-aware
+  // Onboarding checklist — derived from real workspace data, no schema changes
+  const checklist = [
+    { id: "profile",   label: "Complete your profile",      done: !!profile?.onboarding_complete, to: "/app/settings" },
+    { id: "validate",  label: "Validate your first idea",   done: succeeded("validate-idea"),     to: "/app/launchpad/idea-validator" },
+    { id: "pitch",     label: "Generate your pitch",        done: succeeded("generate-pitch"),    to: "/app/launchpad/pitch-generator" },
+    { id: "gtm",       label: "Map your go-to-market",      done: succeeded("generate-gtm-strategy"), to: "/app/launchpad/gtm-strategy" },
+    { id: "lead",      label: "Capture your first lead",    done: leads.length > 0,               to: "/app/nova/leads" },
+    { id: "automate",  label: "Wire an automation",         done: automations.length > 0,         to: "/app/nova/workflows" },
+  ];
+  const checklistDone = checklist.filter((c) => c.done).length;
+  const checklistComplete = checklistDone === checklist.length;
+
   const nextAction = (() => {
     if (!succeeded("validate-idea")) return { title: "Validate your idea first",  desc: "Pressure-test market signal in 60 seconds before you build anything.", cta: "Run validator", to: "/app/launchpad/idea-validator", icon: Lightbulb };
     if (!succeeded("generate-pitch")) return { title: "Generate your pitch",      desc: "Investor-ready pitch you can send today.", cta: "Generate pitch", to: "/app/launchpad/pitch-generator", icon: Megaphone };
