@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { MissionHeader, StatusBadge } from "@/components/app/MissionHeader";
+import { WorkspaceHeader } from "@/components/app/WorkspaceHeader";
 import { novaSystemsCatalog, type NovaModule } from "@/lib/mock";
 import { useAuth } from "@/lib/auth";
 import { subscriptionQuery, integrationsQuery } from "@/lib/queries";
@@ -43,12 +44,14 @@ function NovaOverview() {
 
   return (
     <div className="space-y-7">
-      <MissionHeader
-        label="Nova OS"
+      <WorkspaceHeader
+        variant="nova"
+        icon={Zap}
+        eyebrow="Nova OS · operations control"
         title="Automation modules"
         description="Toggle modules on to put repetitive work on autopilot. Each one connects to your existing tools."
         actions={
-          <span className="text-[11.5px] text-muted-foreground">
+          <span className="rounded-full border border-border bg-surface/80 backdrop-blur px-2.5 py-1 text-[11px] text-muted-foreground">
             Plan: <span className="font-medium capitalize text-foreground">{plan}</span>
           </span>
         }
