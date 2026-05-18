@@ -106,6 +106,89 @@ const PATTERNS: Pattern[] = [
     ],
     bareTriggers: [/^first\s+(?:10|ten)(?:\s+customers)?$/i, /^acquisition$/i],
   },
+  {
+    slug: "kill-my-idea",
+    verb: "Kill this idea",
+    matchers: [
+      /^(?:kill|destroy|tear\s+apart|critique|roast|challenge)\s+(?:my\s+)?(?:idea\s+(?:for\s+|about\s+)?)?(.+)$/i,
+      /^(?:what['']?s\s+wrong\s+with|why\s+will\s+.+\s+fail|devil['']?s\s+advocate\s+for)\s+(.+)$/i,
+    ],
+    bareTriggers: [/^kill$/i, /^kill\s+(?:my\s+)?idea$/i, /^roast$/i, /^critique$/i],
+  },
+  {
+    slug: "funding-score",
+    verb: "Score funding readiness",
+    matchers: [
+      /^(?:score|rate|assess|check)\s+(?:my\s+)?(?:funding|fundrais(?:e|ing)|investor\s+readiness)\s+(?:for\s+|on\s+)?(.+)$/i,
+      /^(?:how\s+fundable\s+is\s+|am\s+i\s+ready\s+to\s+raise\s+for\s+)(.+)$/i,
+    ],
+    bareTriggers: [/^funding\s+score$/i, /^fundrais(?:e|ing)$/i, /^investor\s+readiness$/i, /^fundable$/i],
+  },
+  {
+    slug: "business-plan",
+    verb: "Write business plan",
+    matchers: [
+      /^(?:write|create|build|draft|generate|make)\s+(?:a\s+|an?\s+|my\s+)?business\s+plan\s+(?:for\s+|about\s+)?(.+)$/i,
+      /^business\s+plan\s+(?:for\s+)(.+)$/i,
+    ],
+    bareTriggers: [/^business\s+plan$/i, /^biz\s+plan$/i],
+  },
+  {
+    slug: "investor-emails",
+    verb: "Write investor emails",
+    matchers: [
+      /^(?:write|draft|create|generate)\s+(?:investor|vc|cold)\s+(?:outreach\s+)?emails?\s+(?:for\s+|about\s+)?(.+)$/i,
+      /^(?:cold\s+email|outreach)\s+(?:to\s+)?(?:investors?\s+)?(?:for\s+)?(.+)$/i,
+    ],
+    bareTriggers: [/^investor\s+emails?$/i, /^cold\s+outreach$/i, /^vc\s+emails?$/i],
+  },
+  {
+    slug: "idea-vs-idea",
+    verb: "Compare ideas",
+    matchers: [
+      /^(?:compare|vs|versus)\s+(.+?)\s+(?:vs\.?\s+|versus\s+|against\s+).+$/i,
+      /^(?:which\s+is\s+better|choose\s+between)\s+(.+)$/i,
+    ],
+    bareTriggers: [/^idea\s+vs\.?\s+idea$/i, /^compare\s+ideas$/i, /^versus$/i],
+  },
+  {
+    slug: "landing-page",
+    verb: "Write landing page",
+    matchers: [
+      /^(?:write|create|build|generate|draft)\s+(?:a\s+|my\s+)?landing\s+page\s+(?:for\s+|about\s+)?(.+)$/i,
+      /^landing\s+page\s+(?:copy\s+)?(?:for\s+)(.+)$/i,
+    ],
+    bareTriggers: [/^landing\s+page$/i, /^homepage\s+copy$/i, /^lp$/i],
+  },
+  {
+    slug: "competitor",
+    verb: "Analyse competitors",
+    matchers: [
+      /^(?:analyse?|analyze|research|map|find)\s+(?:my\s+|the\s+)?competi(?:tors?|tion)\s+(?:for\s+|in\s+)?(.+)$/i,
+      /^competitor\s+(?:analysis|research|landscape)\s+(?:for\s+)?(.+)$/i,
+    ],
+    bareTriggers: [/^competi(?:tor|tion)$/i, /^competitor\s+analysis$/i, /^market\s+map$/i],
+  },
+  {
+    slug: "pricing",
+    verb: "Build pricing strategy",
+    matchers: [
+      /^(?:build|create|design|generate|plan)\s+(?:a\s+|my\s+)?pricing\s+(?:strategy|model|plan)\s+(?:for\s+)?(.+)$/i,
+      /^(?:how\s+should\s+i\s+price|what\s+should\s+i\s+charge\s+for)\s+(.+)$/i,
+      /^pricing\s+(?:for\s+)(.+)$/i,
+    ],
+    bareTriggers: [/^pric(?:e|ing)$/i, /^pricing\s+strategy$/i, /^monetiz(?:e|ation)$/i],
+  },
+  {
+    slug: "revenue-projector",
+    verb: "Project revenue",
+    matchers: [
+      /^(?:project|forecast|model|estimate|calculate)\s+(?:my\s+|the\s+)?revenue\s+(?:for\s+|of\s+)?(.+)$/i,
+      /^(?:revenue|mrr|arr)\s+(?:forecast|projection|model)\s+(?:for\s+)?(.+)$/i,
+      /^(?:how\s+much\s+(?:revenue|money)\s+can\s+i\s+make\s+from\s+)(.+)$/i,
+    ],
+    bareTriggers: [/^revenue\s+projector$/i, /^revenue\s+forecast$/i, /^mrr\s+model$/i, /^arr$/i],
+  },
 ];
 
 const STOP_WORDS = new Set([
